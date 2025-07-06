@@ -13,7 +13,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { BookOpen, Plus, Trash2, ArrowLeft, Settings, Clock } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { BookOpen, Plus, Trash2, ArrowLeft, Settings, Clock, Eye } from "lucide-react"
 import { createQuiz } from "@/lib/quiz-actions"
 import type { User, QuizQuestion, QuestionType } from "@/lib/types"
 
@@ -27,6 +28,8 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [showQuizSettings, setShowQuizSettings] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
+  const [currentPreviewQuestion, setCurrentPreviewQuestion] = useState(0)
   const [quizSettings, setQuizSettings] = useState({
     showLeaderboard: true,
     randomizeQuestions: false,
@@ -415,6 +418,8 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                               />
                             ) : (
                               <input
+                                aria-label={`Correct answer for option ${optionIndex + 1}`}
+                                title={`Select as correct answer for option ${optionIndex + 1}`}
                                 type="radio"
                                 name={`correct-${question.id}`}
                                 checked={question.correctAnswers.includes(optionIndex)}
@@ -470,6 +475,90 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                 Cancel
               </Button>
             </Link>
+            <Dialog open={showPreview} onOpenChange={setShowPreview}>
+              <DialogTrigger asChild>
+                <Button type="button" variant="outline" disabled={!title || questions.some(q => !q.question)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>{title || "Quiz Preview"}</DialogTitle>
+                  <DialogDescription>
+                    {description || "Preview how your quiz will look to participants"}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="mt-6">
+                  {questions.length > 0 && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">
+                          Question {currentPreviewQuestion + 1} of {questions.length}
+                        </span>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPreviewQuestion(Math.max(0, currentPreviewQuestion - 1))}
+                            disabled={currentPreviewQuestion === 0}
+                          >
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPreviewQuestion(Math.min(questions.length - 1, currentPreviewQuestion + 1))}
+                            disabled={currentPreviewQuestion === questions.length - 1}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">
+                            {questions[currentPreviewQuestion]?.question || "Question text"}
+                          </CardTitle>
+                          <div className="flex items-center justify-between text-sm text-gray-500">
+                            <span>Type: {questions[currentPreviewQuestion]?.type}</span>
+                            <span>Points: {questions[currentPreviewQuestion]?.settings.points}</span>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          {questions[currentPreviewQuestion]?.type === "open-ended" ? (
+                            <Textarea placeholder="Participant would type their answer here..." disabled />
+                          ) : (
+                            <div className="space-y-3">
+                              {questions[currentPreviewQuestion]?.options.map((option, index) => (
+                                <div key={index} className="flex items-center space-x-3">
+                                  {questions[currentPreviewQuestion]?.type === "multiple-choice" ? (
+                                    <Checkbox disabled />
+                                  ) : (
+                                    <input 
+                                      type="radio"
+                                      name="preview-option" 
+                                      disabled 
+                                      title={`Preview option ${index + 1}`}
+                                      aria-label={`Preview option ${index + 1}`}
+                                    />
+                                  )}
+                                  <span className={`${questions[currentPreviewQuestion]?.correctAnswers.includes(index) ? 'text-green-600 font-medium' : ''}`}>
+                                    {option || `Option ${index + 1}`}
+                                    {questions[currentPreviewQuestion]?.correctAnswers.includes(index) && " ✓"}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? "Creating..." : "Create Quiz"}
             </Button>

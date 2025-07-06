@@ -22,7 +22,9 @@ export function SignInForm() {
     try {
       const result = await signIn(formData)
       if (result.success) {
-        router.push("/dashboard")
+        // Force a full page reload to ensure session is recognized
+        window.location.replace("/dashboard")
+        return // Don't set loading to false as we're redirecting
       } else {
         setError(result.error || "Invalid credentials")
       }

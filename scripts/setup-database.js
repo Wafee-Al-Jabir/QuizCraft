@@ -1,7 +1,14 @@
 import { MongoClient } from "mongodb"
+import dotenv from "dotenv"
 
-const uri =
-  "mongodb+srv://wafeealjabir:Wafee2015@cluster0.5fslq8i.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+// Load environment variables
+dotenv.config({ path: '.env.local' })
+
+const uri = process.env.MONGODB_URI
+
+if (!uri) {
+  throw new Error('MONGODB_URI environment variable is not set')
+}
 
 async function setupDatabase() {
   const client = new MongoClient(uri)
@@ -22,11 +29,18 @@ async function setupDatabase() {
     await db.collection("quizzes").createIndex({ userId: 1 })
     await db.collection("quizzes").createIndex({ published: 1 })
     await db.collection("quizzes").createIndex({ createdAt: -1 })
+    await db.collection("quizzes").createIndex({ userId: 1, published: 1 })
     console.log("Created indexes on quizzes collection")
 
     // Create compound index for quiz participants
     await db.collection("quizzes").createIndex({ _id: 1, "participants.id": 1 })
     console.log("Created compound index for quiz participants")
+
+    // Create indexes for sessions collection
+    await db.collection("sessions").createIndex({ sessionId: 1 }, { unique: true })
+    await db.collection("sessions").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+    await db.collection("sessions").createIndex({ userId: 1 })
+    console.log("Created indexes on sessions collection")
 
     console.log("Database setup completed successfully!")
   } catch (error) {

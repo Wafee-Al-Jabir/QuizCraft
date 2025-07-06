@@ -1,9 +1,37 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BookOpen, Users, Trophy, Zap } from "lucide-react"
+import { BookOpen, Users, Trophy, Zap, LogOut } from "lucide-react"
+import { getCurrentUser } from "@/lib/auth"
+import { signOut } from "@/lib/auth-actions"
+import type { User } from "@/lib/types"
 
 export default function HomePage() {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const currentUser = await getCurrentUser()
+        setUser(currentUser)
+      } catch (error) {
+        console.error("Auth check failed:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    checkAuth()
+  }, [])
+
+  const handleSignOut = async () => {
+    await signOut()
+    setUser(null)
+    window.location.reload()
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
@@ -14,12 +42,33 @@ export default function HomePage() {
             <h1 className="text-2xl font-bold text-gray-900">QuizCraft</h1>
           </div>
           <div className="space-x-4">
-            <Link href="/auth/signin">
-              <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button>Get Started</Button>
-            </Link>
+            {isLoading ? (
+              <div className="animate-pulse">
+                <div className="h-9 w-20 bg-gray-200 rounded"></div>
+              </div>
+            ) : user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">
+                  Welcome, {user.firstName}!
+                </span>
+                <Link href="/dashboard">
+                  <Button variant="ghost">Dashboard</Button>
+                </Link>
+                <Button variant="ghost" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link href="/auth/signin">
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button>Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -31,17 +80,44 @@ export default function HomePage() {
           Build engaging quizzes, share them with your audience, and track results. Perfect for educators, trainers, and
           content creators.
         </p>
-        <div className="space-x-4">
-          <Link href="/auth/signup">
-            <Button size="lg" className="text-lg px-8 py-3">
-              Start Creating Free
-            </Button>
-          </Link>
-          <Link href="/demo">
-            <Button variant="outline" size="lg" className="text-lg px-8 py-3 bg-transparent">
-              View Demo
-            </Button>
-          </Link>
+        <div className="flex flex-wrap justify-center gap-4">
+          {user ? (
+            <>
+              <Link href="/quiz/create">
+                <Button size="lg" className="text-lg px-8 py-3">
+                  Create New Quiz
+                </Button>
+              </Link>
+              <Link href="/dashboard">
+                <Button variant="outline" size="lg" className="text-lg px-8 py-3 bg-transparent">
+                  Host Quiz
+                </Button>
+              </Link>
+              <Link href="/quiz/join">
+                <Button variant="secondary" size="lg" className="text-lg px-8 py-3 font-mono tracking-wide">
+                  Join Quiz
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/auth/signup">
+                <Button size="lg" className="text-lg px-8 py-3">
+                  Start Creating Free
+                </Button>
+              </Link>
+              <Link href="/quiz/join">
+                 <Button variant="outline" size="lg" className="text-lg px-8 py-3 bg-transparent font-mono tracking-wide">
+                   Join Quiz
+                 </Button>
+               </Link>
+              <Link href="/demo">
+                <Button variant="secondary" size="lg" className="text-lg px-8 py-3">
+                  View Demo
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </section>
 

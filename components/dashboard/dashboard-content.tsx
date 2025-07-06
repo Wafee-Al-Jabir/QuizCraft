@@ -4,9 +4,10 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle } from "lucide-react"
 import { signOut } from "@/lib/auth-actions"
-import { getQuizzes, getQuizStats, publishQuiz } from "@/lib/quiz-actions"
+import { getQuizzes, getQuizStats, publishQuiz, deleteQuiz } from "@/lib/quiz-actions"
 import type { User, Quiz } from "@/lib/types"
 
 interface QuizStats {
@@ -38,7 +39,13 @@ export function DashboardContent({ user }: DashboardContentProps) {
         const [userQuizzes, quizStats] = await Promise.all([getQuizzes(user.id), getQuizStats(user.id)])
 
         setQuizzes(userQuizzes)
-        setStats(quizStats)
+        setStats({
+          totalQuizzes: quizStats.totalQuizzes,
+          publishedQuizzes: quizStats.publishedQuizzes,
+          totalQuestions: quizStats.totalQuestions,
+          totalParticipants: quizStats.totalParticipants,
+          averageScore: quizStats.averageScore,
+        })
       } catch (error) {
         console.error("Failed to load dashboard data:", error)
       } finally {
@@ -67,6 +74,34 @@ export function DashboardContent({ user }: DashboardContentProps) {
       }
     } catch (error) {
       console.error("Failed to toggle quiz publication:", error)
+    }
+  }
+
+  const handleDeleteQuiz = async (quizId: string, quizTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${quizTitle}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const success = await deleteQuiz(quizId)
+      if (success) {
+        const deletedQuiz = quizzes.find(q => q.id === quizId)
+        setQuizzes(quizzes.filter((quiz) => quiz.id !== quizId))
+
+        // Update stats
+        setStats((prev) => ({
+          ...prev,
+          totalQuizzes: prev.totalQuizzes - 1,
+          publishedQuizzes: deletedQuiz?.published ? prev.publishedQuizzes - 1 : prev.publishedQuizzes,
+          totalQuestions: prev.totalQuestions - (deletedQuiz?.questions.length || 0),
+          totalParticipants: prev.totalParticipants - (deletedQuiz?.participants?.length || 0),
+        }))
+      } else {
+        alert("Failed to delete quiz. Please try again.")
+      }
+    } catch (error) {
+      console.error("Failed to delete quiz:", error)
+      alert("An error occurred while deleting the quiz.")
     }
   }
 
@@ -175,9 +210,23 @@ export function DashboardContent({ user }: DashboardContentProps) {
                       <CardDescription>{quiz.description}</CardDescription>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => handleTogglePublish(quiz.id, quiz.published)}>
-                        {quiz.published ? "Unpublish" : "Publish"}
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={() => handleTogglePublish(quiz.id, quiz.published)}>
+                              {quiz.published ? "Unpublish" : "Publish"}
+                              <HelpCircle className="h-3 w-3 ml-1 opacity-50" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              {quiz.published 
+                                ? "Make this quiz private and remove it from public discovery" 
+                                : "Make this quiz publicly available for others to discover and join"}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <span
                         className={`px-2 py-1 text-xs rounded-full ${
                           quiz.published ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
@@ -191,8 +240,16 @@ export function DashboardContent({ user }: DashboardContentProps) {
                           Edit
                         </Button>
                       </Link>
-                      <Link href={`/quiz/${quiz.id}/take`}>
-                        <Button size="sm">Take Quiz</Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => handleDeleteQuiz(quiz.id, quiz.title)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                      <Link href={`/quiz/${quiz.id}/host`}>
+                        <Button size="sm">Host Quiz</Button>
                       </Link>
                     </div>
                   </div>
