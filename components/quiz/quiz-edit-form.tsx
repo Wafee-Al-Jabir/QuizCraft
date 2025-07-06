@@ -177,25 +177,25 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+    <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <Button variant="ghost" onClick={() => router.back()} size="sm" className="sm:size-default">
+            <ArrowLeft className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
-          <h1 className="text-3xl font-bold">Edit Quiz</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Edit Quiz</h1>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Basic Info */}
         <Card>
-          <CardHeader>
-            <CardTitle>Quiz Information</CardTitle>
-            <CardDescription>Basic details about your quiz</CardDescription>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl">Quiz Information</CardTitle>
+            <CardDescription className="text-sm">Basic details about your quiz</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             <div>
               <Label htmlFor="title">Quiz Title</Label>
               <Input
@@ -221,15 +221,15 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
 
         {/* Quiz Settings */}
         <Card>
-          <CardHeader>
-            <CardTitle>Quiz Settings</CardTitle>
-            <CardDescription>Configure how your quiz behaves</CardDescription>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl">Quiz Settings</CardTitle>
+            <CardDescription className="text-sm">Configure how your quiz behaves</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="showLeaderboard">Show Leaderboard</Label>
-                <p className="text-sm text-gray-600">Display participant rankings after quiz completion</p>
+          <CardContent className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+              <div className="flex-1">
+                <Label htmlFor="showLeaderboard" className="text-sm sm:text-base">Show Leaderboard</Label>
+                <p className="text-xs sm:text-sm text-gray-600">Display participant rankings after quiz completion</p>
               </div>
               <Switch
                 id="showLeaderboard"
@@ -239,10 +239,10 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
                 }
               />
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="randomizeQuestions">Randomize Questions</Label>
-                <p className="text-sm text-gray-600">Show questions in random order for each participant</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+              <div className="flex-1">
+                <Label htmlFor="randomizeQuestions" className="text-sm sm:text-base">Randomize Questions</Label>
+                <p className="text-xs sm:text-sm text-gray-600">Show questions in random order for each participant</p>
               </div>
               <Switch
                 id="randomizeQuestions"
@@ -252,10 +252,10 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
                 }
               />
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="randomizeOptions">Randomize Answer Options</Label>
-                <p className="text-sm text-gray-600">Show answer options in random order</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+              <div className="flex-1">
+                <Label htmlFor="randomizeOptions" className="text-sm sm:text-base">Randomize Answer Options</Label>
+                <p className="text-xs sm:text-sm text-gray-600">Show answer options in random order</p>
               </div>
               <Switch
                 id="randomizeOptions"
@@ -270,32 +270,32 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
 
         {/* Questions */}
         <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
+          <CardHeader className="pb-3 sm:pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
               <div>
-                <CardTitle>Questions ({questions.length})</CardTitle>
-                <CardDescription>Add and configure your quiz questions</CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Questions ({questions.length})</CardTitle>
+                <CardDescription className="text-sm">Add and configure your quiz questions</CardDescription>
               </div>
-              <Button type="button" onClick={addQuestion}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Question
+              <Button type="button" onClick={addQuestion} size="sm" className="sm:size-default w-full sm:w-auto">
+                <Plus className="h-4 w-4 sm:mr-2" />
+                <span className="ml-2 sm:ml-0">Add Question</span>
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6">
             {questions.map((question, questionIndex) => (
               <Card key={question.id} className="border-l-4 border-l-blue-500">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">Question {questionIndex + 1}</CardTitle>
-                    <div className="flex items-center space-x-2">
+                <CardHeader className="pb-3 sm:pb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+                    <CardTitle className="text-base sm:text-lg">Question {questionIndex + 1}</CardTitle>
+                    <div className="flex items-center space-x-2 w-full sm:w-auto">
                       <Select
                         value={question.type}
                         onValueChange={(value: "single-choice" | "multiple-choice") =>
                           updateQuestion(question.id, { type: value, correctAnswers: [0] })
                         }
                       >
-                        <SelectTrigger className="w-40">
+                        <SelectTrigger className="w-full sm:w-40 text-xs sm:text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -309,29 +309,31 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
                           variant="destructive"
                           size="sm"
                           onClick={() => removeQuestion(question.id)}
+                          className="shrink-0"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       )}
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4">
                   <div>
-                    <Label>Question Text</Label>
+                    <Label className="text-sm sm:text-base">Question Text</Label>
                     <Textarea
                       value={question.question}
                       onChange={(e) => updateQuestion(question.id, { question: e.target.value })}
                       placeholder="Enter your question"
                       rows={2}
+                      className="text-sm sm:text-base"
                     />
                   </div>
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label>Answer Options</Label>
-                      <Button type="button" variant="outline" size="sm" onClick={() => addOption(question.id)}>
-                        <Plus className="h-3 w-3 mr-1" />
-                        Add Option
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2 sm:gap-0">
+                      <Label className="text-sm sm:text-base">Answer Options</Label>
+                      <Button type="button" variant="outline" size="sm" onClick={() => addOption(question.id)} className="w-full sm:w-auto">
+                        <Plus className="h-3 w-3 sm:mr-1" />
+                        <span className="ml-1 sm:ml-0">Add Option</span>
                       </Button>
                     </div>
                     <div className="space-y-2">
@@ -340,12 +342,13 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
                           <Checkbox
                             checked={question.correctAnswers.includes(optionIndex)}
                             onCheckedChange={() => toggleCorrectAnswer(question.id, optionIndex)}
+                            className="shrink-0"
                           />
                           <Input
                             value={option}
                             onChange={(e) => updateOption(question.id, optionIndex, e.target.value)}
                             placeholder={`Option ${optionIndex + 1}`}
-                            className="flex-1"
+                            className="flex-1 text-sm sm:text-base"
                           />
                           {question.options.length > 2 && (
                             <Button
@@ -353,14 +356,15 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => removeOption(question.id, optionIndex)}
+                              className="shrink-0"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                           )}
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">
                       {question.type === "single-choice"
                         ? "Check one correct answer"
                         : "Check all correct answers"}
@@ -373,13 +377,13 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
         </Card>
 
         {/* Submit Button */}
-        <div className="flex justify-end space-x-4">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
+          <Button type="button" variant="outline" onClick={() => router.back()} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            <Save className="h-4 w-4 mr-2" />
-            {isLoading ? "Saving..." : "Save Changes"}
+          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+            <Save className="h-4 w-4 sm:mr-2" />
+            <span className="ml-2 sm:ml-0">{isLoading ? "Saving..." : "Save Changes"}</span>
           </Button>
         </div>
       </form>

@@ -128,9 +128,9 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     }
   }, [socket, isConnected, quiz])
 
-  // Timer effect for host
+  // Timer effect for host - continues running even after participants answer
   useEffect(() => {
-    if (!currentQuestion || timeLeft <= 0 || !isQuizActive) return
+    if (!currentQuestion || !isQuizActive) return
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -142,7 +142,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [currentQuestion, timeLeft, isQuizActive])
+  }, [currentQuestion, isQuizActive])
 
   const startQuiz = () => {
     if (!socket || participants.length === 0) return
@@ -243,10 +243,10 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="text-center py-8">
-            <div className="text-lg font-medium text-gray-900 mb-2">Connecting...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300 font-['Poppins']">
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
+          <CardContent className="text-center py-6 sm:py-8">
+            <div className="text-base sm:text-lg font-medium text-gray-900 mb-2">Connecting...</div>
             <div className="text-sm text-gray-600">Please wait while we establish connection</div>
           </CardContent>
         </Card>
@@ -256,35 +256,35 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
 
   if (isQuizFinished) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3 sm:p-4 transition-colors duration-300 font-['Poppins']">
         <div className="max-w-4xl mx-auto">
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Trophy className="h-12 w-12 text-yellow-500" />
+              <div className="flex items-center justify-center mb-3 sm:mb-4">
+                <Trophy className="h-10 w-10 sm:h-12 sm:w-12 text-yellow-500" />
               </div>
-              <CardTitle className="text-2xl">Quiz Completed!</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl">Quiz Completed!</CardTitle>
               <CardDescription>Final Results</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold mb-4">Final Leaderboard</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Final Leaderboard</h3>
                 {leaderboard.map((participant, index) => (
-                  <div key={participant.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                  <div key={participant.id} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base ${
                         index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-400' : 'bg-gray-300'
                       }`}>
                         {index + 1}
                       </div>
-                      <span className="font-medium">{participant.name}</span>
+                      <span className="font-medium text-sm sm:text-base">{participant.name}</span>
                     </div>
-                    <Badge variant="secondary">{participant.score} points</Badge>
+                    <Badge variant="secondary" className="text-xs sm:text-sm">{participant.score} points</Badge>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 flex justify-center">
-                <Button onClick={onClose}>Close Host Session</Button>
+              <div className="mt-4 sm:mt-6 flex justify-center">
+                <Button onClick={onClose} className="w-full sm:w-auto">Close Host Session</Button>
               </div>
             </CardContent>
           </Card>
@@ -294,47 +294,47 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3 sm:p-4 transition-colors duration-300 font-['Poppins']">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{quiz.title}</h1>
-            <p className="text-gray-600">{quiz.description}</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{quiz.title}</h1>
+            <p className="text-sm sm:text-base text-gray-600">{quiz.description}</p>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
             {sessionCode && (
               <div className="text-center">
-                <div className="text-sm text-gray-600">Session Code</div>
-                <div className="text-2xl font-bold text-indigo-600">{sessionCode}</div>
+                <div className="text-xs sm:text-sm text-gray-600">Session Code</div>
+                <div className="text-xl sm:text-2xl font-bold text-indigo-600">{sessionCode}</div>
               </div>
             )}
-            <Button variant="outline" onClick={onClose}>Close</Button>
+            <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">Close</Button>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2">
             {isWaitingRoom ? (
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Users className="h-5 w-5 mr-2" />
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     Waiting Room
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm sm:text-base">
                     Share the session code with participants to join
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8">
-                    <div className="text-6xl font-bold text-indigo-600 mb-4">{sessionCode}</div>
-                    <p className="text-gray-600 mb-6">Participants can join using this code</p>
+                  <div className="text-center py-6 sm:py-8">
+                    <div className="text-4xl sm:text-6xl font-bold text-indigo-600 mb-3 sm:mb-4">{sessionCode}</div>
+                    <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Participants can join using this code</p>
                     <Button 
                       onClick={startQuiz} 
                       disabled={participants.length === 0}
-                      className="px-8 py-3"
+                      className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3"
                     >
                       <Play className="h-4 w-4 mr-2" />
                       Start Quiz ({participants.length} participants)
@@ -343,54 +343,54 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                 </CardContent>
               </Card>
             ) : currentQuestion ? (
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+                    <CardTitle className="text-base sm:text-lg">
                       Question {currentQuestion.questionNumber} of {currentQuestion.totalQuestions}
                     </CardTitle>
-                    <Badge variant={timeLeft <= 10 ? "destructive" : "outline"}>
+                    <Badge variant={timeLeft <= 10 ? "destructive" : "outline"} className="self-start sm:self-auto">
                       <Clock className="h-3 w-3 mr-1" />
                       {timeLeft}s
                     </Badge>
                   </div>
                   <Progress 
                     value={(currentQuestion.questionNumber / currentQuestion.totalQuestions) * 100} 
-                    className="w-full"
+                    className="w-full mt-2"
                   />
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    <div className="text-xl font-medium">{currentQuestion.question.text}</div>
+                  <div className="space-y-4 sm:space-y-6">
+                    <div className="text-lg sm:text-xl font-medium leading-relaxed">{currentQuestion.question.text}</div>
                     
-                    <div className="grid gap-3">
+                    <div className="grid gap-2 sm:gap-3">
                       {currentQuestion.question.options.map((option, index) => (
-                        <div key={index} className="p-3 bg-gray-50 rounded-lg border">
-                          <span className="font-medium text-gray-700">
+                        <div key={index} className="p-2 sm:p-3 bg-gray-50 rounded-lg border">
+                          <span className="text-sm sm:text-base font-medium text-gray-700">
                             {String.fromCharCode(65 + index)}. {option}
                           </span>
                         </div>
                       ))}
                     </div>
 
-                    <div className="flex items-center justify-between pt-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-3 sm:pt-4 gap-3 sm:gap-0">
                       <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                        <span className="text-sm text-gray-600">
+                        <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                        <span className="text-xs sm:text-sm text-gray-600">
                           {answeredParticipants.size} of {participants.length} answered
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" onClick={showLeaderboard}>
-                          <BarChart3 className="h-4 w-4 mr-2" />
-                          Show Leaderboard
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                        <Button variant="outline" onClick={showLeaderboard} className="text-xs sm:text-sm">
+                          <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                          <span className="hidden sm:inline">Show </span>Leaderboard
                         </Button>
-                        <Button variant="outline" onClick={() => setInterludeType('poll')} disabled={!pollQuestion.trim() || !pollOptions.every(opt => opt.trim())}>
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Start Poll
+                        <Button variant="outline" onClick={() => setInterludeType('poll')} disabled={!pollQuestion.trim() || !pollOptions.every(opt => opt.trim())} className="text-xs sm:text-sm">
+                          <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                          <span className="hidden sm:inline">Start </span>Poll
                         </Button>
-                        <Button onClick={nextQuestion}>
-                          <SkipForward className="h-4 w-4 mr-2" />
+                        <Button onClick={nextQuestion} className="text-xs sm:text-sm">
+                          <SkipForward className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                           {currentQuestion.questionNumber === currentQuestion.totalQuestions ? 'Finish Quiz' : 'Next Question'}
                         </Button>
                       </div>
@@ -402,37 +402,37 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
             
             {/* Poll/Leaderboard Interlude */}
             {showInterlude && (
-              <Card className="mt-6">
+              <Card className="mt-4 sm:mt-6">
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="flex items-center">
+                  <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+                    <span className="flex items-center text-lg sm:text-xl">
                       {interludeType === 'leaderboard' ? (
-                        <><BarChart3 className="h-5 w-5 mr-2" />Current Leaderboard</>
+                        <><BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />Current Leaderboard</>
                       ) : (
-                        <><MessageSquare className="h-5 w-5 mr-2" />Live Poll</>
+                        <><MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />Live Poll</>
                       )}
                     </span>
-                    <Button variant="outline" onClick={interludeType === 'leaderboard' ? closeLeaderboard : closePoll}>
+                    <Button variant="outline" onClick={interludeType === 'leaderboard' ? closeLeaderboard : closePoll} className="self-start sm:self-auto">
                       Close
                     </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {interludeType === 'leaderboard' ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       {participants
                         .sort((a, b) => b.score - a.score)
                         .map((participant, index) => (
-                          <div key={participant.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border">
-                            <div className="flex items-center space-x-3">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg ${
+                          <div key={participant.id} className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border">
+                            <div className="flex items-center space-x-2 sm:space-x-3">
+                              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg ${
                                 index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-400' : 'bg-gray-300'
                               }`}>
                                 {index + 1}
                               </div>
-                              <span className="font-semibold text-lg">{participant.name}</span>
+                              <span className="font-semibold text-sm sm:text-lg">{participant.name}</span>
                             </div>
-                            <Badge variant="secondary" className="text-lg px-3 py-1">
+                            <Badge variant="secondary" className="text-sm sm:text-lg px-2 sm:px-3 py-1">
                               {participant.score} points
                             </Badge>
                           </div>
@@ -440,23 +440,23 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                       }
                     </div>
                   ) : activePoll ? (
-                    <div className="space-y-4">
-                      <h3 className="text-xl font-semibold">{activePoll.question}</h3>
-                      <div className="space-y-3">
+                    <div className="space-y-3 sm:space-y-4">
+                      <h3 className="text-lg sm:text-xl font-semibold leading-relaxed">{activePoll.question}</h3>
+                      <div className="space-y-2 sm:space-y-3">
                         {activePoll.options.map((option, index) => {
                           const votes = pollResults[option] || 0
                           const totalVotes = Object.values(pollResults).reduce((sum, count) => sum + count, 0)
                           const percentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0
                           
                           return (
-                            <div key={index} className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="font-medium">{option}</span>
-                                <span className="text-sm text-gray-600">{votes} votes ({percentage.toFixed(1)}%)</span>
+                            <div key={index} className="space-y-1 sm:space-y-2">
+                              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                                <span className="text-sm sm:text-base font-medium">{option}</span>
+                                <span className="text-xs sm:text-sm text-gray-600">{votes} votes ({percentage.toFixed(1)}%)</span>
                               </div>
-                              <div className="w-full bg-gray-200 rounded-full h-3">
+                              <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
                                 <div 
-                                  className="bg-blue-500 h-3 rounded-full transition-all duration-300" 
+                                  className="bg-blue-500 h-2 sm:h-3 rounded-full transition-all duration-300" 
                                   style={{ width: `${percentage}%` }}
                                 ></div>
                               </div>
@@ -464,7 +464,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                           )
                         })}
                       </div>
-                      <div className="text-center text-sm text-gray-600 mt-4">
+                      <div className="text-center text-xs sm:text-sm text-gray-600 mt-3 sm:mt-4">
                         Total responses: {Object.values(pollResults).reduce((sum, count) => sum + count, 0)}
                       </div>
                     </div>
@@ -478,29 +478,29 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
           <div>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
+                <CardTitle className="flex items-center text-lg sm:text-xl">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   Participants ({participants.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-2 sm:space-y-3 max-h-80 sm:max-h-96 overflow-y-auto">
                   {participants.length === 0 ? (
-                    <div className="text-center py-4 text-gray-500">
+                    <div className="text-center py-3 sm:py-4 text-gray-500 text-sm">
                       No participants yet
                     </div>
                   ) : (
                     participants
                       .sort((a, b) => b.score - a.score)
                       .map((participant, index) => (
-                        <div key={participant.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={participant.id} className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center space-x-2">
-                            <div className="w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-medium">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-medium">
                               {index + 1}
                             </div>
-                            <span className="font-medium text-sm">{participant.name}</span>
+                            <span className="font-medium text-xs sm:text-sm">{participant.name}</span>
                             {answeredParticipants.has(participant.id) && (
-                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                             )}
                           </div>
                           <Badge variant="secondary" className="text-xs">
@@ -515,28 +515,28 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
             
             {/* Poll Creation Form */}
             {!isWaitingRoom && (
-              <Card className="mt-4">
+              <Card className="mt-3 sm:mt-4">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <MessageSquare className="h-5 w-5 mr-2" />
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     Create Poll
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <div>
-                      <Label htmlFor="poll-question">Poll Question</Label>
+                      <Label htmlFor="poll-question" className="text-sm sm:text-base">Poll Question</Label>
                       <Input
                         id="poll-question"
                         value={pollQuestion}
                         onChange={(e) => setPollQuestion(e.target.value)}
                         placeholder="Enter your poll question..."
-                        className="mt-1"
+                        className="mt-1 text-sm sm:text-base"
                       />
                     </div>
                     
                     <div>
-                      <Label>Poll Options</Label>
+                      <Label className="text-sm sm:text-base">Poll Options</Label>
                       <div className="space-y-2 mt-1">
                         {pollOptions.map((option, index) => (
                           <div key={index} className="flex items-center space-x-2">
@@ -544,13 +544,14 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                               value={option}
                               onChange={(e) => updatePollOption(index, e.target.value)}
                               placeholder={`Option ${index + 1}`}
-                              className="flex-1"
+                              className="flex-1 text-sm sm:text-base"
                             />
                             {pollOptions.length > 2 && (
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => removePollOption(index)}
+                                className="px-2 sm:px-3"
                               >
                                 ×
                               </Button>
@@ -559,12 +560,13 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                         ))}
                       </div>
                       
-                      <div className="flex space-x-2 mt-2">
+                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={addPollOption}
                           disabled={pollOptions.length >= 6}
+                          className="text-xs sm:text-sm"
                         >
                           Add Option
                         </Button>
@@ -572,6 +574,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                           size="sm"
                           onClick={showPoll}
                           disabled={!pollQuestion.trim() || !pollOptions.every(opt => opt.trim())}
+                          className="text-xs sm:text-sm"
                         >
                           Start Poll
                         </Button>

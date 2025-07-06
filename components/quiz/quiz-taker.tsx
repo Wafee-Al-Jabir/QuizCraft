@@ -233,8 +233,8 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
   // Name entry screen
   if (!isNameEntered) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors duration-300">
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="text-2xl text-center">{quiz.title}</CardTitle>
             <CardDescription className="text-center">Enter your name to begin</CardDescription>
@@ -268,7 +268,7 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
 
     return (
       <>
-        <header className="bg-white border-b">
+        <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 transition-colors duration-300">
           <div className="container mx-auto px-4 py-4 flex items-center space-x-4">
             <Link href="/dashboard">
               <Button variant="ghost" size="sm">
@@ -284,7 +284,7 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
         </header>
 
         <div className="container mx-auto px-4 py-8 max-w-2xl">
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader className="text-center">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
               <CardTitle className="text-2xl">Quiz Completed!</CardTitle>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { SocketProvider } from '@/lib/socket-context'
 import { CookieConsent } from '@/components/cookie-consent'
+import { ThemeProvider } from '@/components/theme-provider'
 
 export const metadata: Metadata = {
   title: 'QuizCraft',
@@ -16,11 +17,35 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="preload"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          as="style"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        />
+        <noscript>
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          />
+        </noscript>
+      </head>
       <body>
-        <SocketProvider>
-          {children}
-        </SocketProvider>
-        <CookieConsent />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange={false}
+        >
+          <SocketProvider>
+            {children}
+          </SocketProvider>
+          <CookieConsent />
+        </ThemeProvider>
       </body>
     </html>
   )

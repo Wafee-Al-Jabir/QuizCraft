@@ -188,44 +188,47 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
     <>
       {/* Header */}
       <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
-            <div className="flex items-center space-x-2">
-              <BookOpen className="h-6 w-6 text-indigo-600" />
-              <h1 className="text-xl font-bold text-gray-900">Create New Quiz</h1>
+        <div className="container mx-auto px-4 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Back to Dashboard</span>
+                </Button>
+              </Link>
+              <div className="flex items-center space-x-2">
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-600" />
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900">Create New Quiz</h1>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-4xl">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Quiz Details */}
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
+            <CardHeader className="pb-3 sm:pb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
                 <div>
-                  <CardTitle>Quiz Details</CardTitle>
-                  <CardDescription>Basic information about your quiz</CardDescription>
+                  <CardTitle className="text-lg sm:text-xl">Quiz Details</CardTitle>
+                  <CardDescription className="text-sm">Basic information about your quiz</CardDescription>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setShowQuizSettings(!showQuizSettings)}
+                  className="w-full sm:w-auto"
                 >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Quiz Settings
+                  <Settings className="h-4 w-4 sm:mr-2" />
+                  <span className="ml-2 sm:ml-0">Quiz Settings</span>
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Quiz Title</Label>
                 <Input
@@ -248,13 +251,13 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
               </div>
 
               {showQuizSettings && (
-                <div className="mt-4 p-4 border rounded-md bg-gray-50">
+                <div className="mt-3 sm:mt-4 p-3 sm:p-4 border rounded-md bg-gray-50">
                   <h3 className="text-sm font-medium mb-3">Quiz Settings</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="showLeaderboard">Show Leaderboard</Label>
-                        <p className="text-sm text-gray-500">Display rankings after quiz completion</p>
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+                      <div className="space-y-0.5 flex-1">
+                        <Label htmlFor="showLeaderboard" className="text-sm sm:text-base">Show Leaderboard</Label>
+                        <p className="text-xs sm:text-sm text-gray-500">Display rankings after quiz completion</p>
                       </div>
                       <Switch
                         id="showLeaderboard"
@@ -262,10 +265,10 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                         onCheckedChange={(checked) => setQuizSettings({ ...quizSettings, showLeaderboard: checked })}
                       />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="randomizeQuestions">Randomize Questions</Label>
-                        <p className="text-sm text-gray-500">Show questions in random order</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+                      <div className="space-y-0.5 flex-1">
+                        <Label htmlFor="randomizeQuestions" className="text-sm sm:text-base">Randomize Questions</Label>
+                        <p className="text-xs sm:text-sm text-gray-500">Show questions in random order</p>
                       </div>
                       <Switch
                         id="randomizeQuestions"
@@ -273,10 +276,10 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                         onCheckedChange={(checked) => setQuizSettings({ ...quizSettings, randomizeQuestions: checked })}
                       />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="randomizeOptions">Randomize Options</Label>
-                        <p className="text-sm text-gray-500">Show answer options in random order</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+                      <div className="space-y-0.5 flex-1">
+                        <Label htmlFor="randomizeOptions" className="text-sm sm:text-base">Randomize Options</Label>
+                        <p className="text-xs sm:text-sm text-gray-500">Show answer options in random order</p>
                       </div>
                       <Switch
                         id="randomizeOptions"
@@ -291,48 +294,50 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
           </Card>
 
           {/* Questions */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Questions</h3>
-              <Button type="button" onClick={addQuestion} variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Question
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+              <h3 className="text-base sm:text-lg font-semibold">Questions</h3>
+              <Button type="button" onClick={addQuestion} variant="outline" className="w-full sm:w-auto">
+                <Plus className="h-4 w-4 sm:mr-2" />
+                <span className="ml-2 sm:ml-0">Add Question</span>
               </Button>
             </div>
 
             {questions.map((question, questionIndex) => (
               <Card key={question.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">Question {questionIndex + 1}</CardTitle>
-                    <div className="flex items-center space-x-2">
+                <CardHeader className="pb-3 sm:pb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+                    <CardTitle className="text-sm sm:text-base">Question {questionIndex + 1}</CardTitle>
+                    <div className="flex items-center space-x-2 w-full sm:w-auto">
                       {questions.length > 1 && (
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removeQuestion(question.id)}>
-                          <Trash2 className="h-4 w-4" />
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeQuestion(question.id)} className="w-full sm:w-auto">
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="ml-2 sm:hidden">Remove</span>
                         </Button>
                       )}
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4">
                   <div className="space-y-2">
-                    <Label>Question Text</Label>
+                    <Label className="text-sm sm:text-base">Question Text</Label>
                     <Textarea
                       value={question.question}
                       onChange={(e) => updateQuestion(question.id, "question", e.target.value)}
                       placeholder="Enter your question"
                       required
+                      className="text-sm sm:text-base"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor={`question-type-${question.id}`}>Question Type</Label>
+                      <Label htmlFor={`question-type-${question.id}`} className="text-sm sm:text-base">Question Type</Label>
                       <Select
                         value={question.type}
                         onValueChange={(value) => handleQuestionTypeChange(question.id, value as QuestionType)}
                       >
-                        <SelectTrigger id={`question-type-${question.id}`}>
+                        <SelectTrigger id={`question-type-${question.id}`} className="text-xs sm:text-sm">
                           <SelectValue placeholder="Select question type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -346,7 +351,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor={`question-points-${question.id}`}>Points</Label>
+                      <Label htmlFor={`question-points-${question.id}`} className="text-sm sm:text-base">Points</Label>
                       <Input
                         id={`question-points-${question.id}`}
                         type="number"
@@ -355,6 +360,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                         onChange={(e) =>
                           updateQuestionSettings(question.id, "points", Number.parseInt(e.target.value) || 0)
                         }
+                        className="text-sm sm:text-base"
                       />
                     </div>
                   </div>
@@ -366,21 +372,22 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                       onCheckedChange={(checked) =>
                         updateQuestionSettings(question.id, "showLeaderboardAfter", !!checked)
                       }
+                      className="shrink-0"
                     />
-                    <Label htmlFor={`show-leaderboard-${question.id}`} className="text-sm">
+                    <Label htmlFor={`show-leaderboard-${question.id}`} className="text-xs sm:text-sm">
                       Show leaderboard after this question
                     </Label>
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label>Time Limit (Optional)</Label>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+                      <Label className="text-sm sm:text-base">Time Limit (Optional)</Label>
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-gray-500" />
                         <Input
                           type="number"
                           placeholder="Seconds"
-                          className="w-24"
+                          className="w-24 text-sm sm:text-base"
                           value={question.settings.timeLimit || ""}
                           onChange={(e) =>
                             updateQuestionSettings(
@@ -396,43 +403,49 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
 
                   {question.type !== "open-ended" && (
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label>Answer Options</Label>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+                        <Label className="text-sm sm:text-base">Answer Options</Label>
                         {question.type !== "true-false" && (
                           <div className="flex space-x-2">
-                            <Button type="button" variant="outline" size="sm" onClick={() => addOption(question.id)}>
-                              <Plus className="h-3 w-3 mr-1" /> Add Option
+                            <Button type="button" variant="outline" size="sm" onClick={() => addOption(question.id)} className="w-full sm:w-auto">
+                              <Plus className="h-3 w-3 mr-1" /> <span className="sm:inline">Add Option</span>
                             </Button>
                           </div>
                         )}
                       </div>
 
                       {question.options.map((option, optionIndex) => (
-                        <div key={optionIndex} className="flex items-center space-x-3">
-                          {question.type !== "poll" &&
-                            (question.type === "multiple-choice" ? (
-                              <Checkbox
-                                checked={question.correctAnswers.includes(optionIndex)}
-                                onCheckedChange={() => toggleCorrectAnswer(question.id, optionIndex)}
-                                className="text-indigo-600"
-                              />
-                            ) : (
-                              <input
-                                aria-label={`Correct answer for option ${optionIndex + 1}`}
-                                title={`Select as correct answer for option ${optionIndex + 1}`}
-                                type="radio"
-                                name={`correct-${question.id}`}
-                                checked={question.correctAnswers.includes(optionIndex)}
-                                onChange={() => toggleCorrectAnswer(question.id, optionIndex)}
-                                className="text-indigo-600"
-                              />
-                            ))}
-                          <div className="flex-1 flex items-center space-x-2">
+                        <div key={optionIndex} className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-3 sm:p-0 border sm:border-0 rounded sm:rounded-none">
+                          <div className="flex items-center space-x-2 sm:space-x-0">
+                            {question.type !== "poll" &&
+                              (question.type === "multiple-choice" ? (
+                                <Checkbox
+                                  checked={question.correctAnswers.includes(optionIndex)}
+                                  onCheckedChange={() => toggleCorrectAnswer(question.id, optionIndex)}
+                                  className="text-indigo-600 shrink-0"
+                                />
+                              ) : (
+                                <input
+                                  aria-label={`Correct answer for option ${optionIndex + 1}`}
+                                  title={`Select as correct answer for option ${optionIndex + 1}`}
+                                  type="radio"
+                                  name={`correct-${question.id}`}
+                                  checked={question.correctAnswers.includes(optionIndex)}
+                                  onChange={() => toggleCorrectAnswer(question.id, optionIndex)}
+                                  className="text-indigo-600 shrink-0"
+                                />
+                              ))}
+                            <span className="text-xs sm:hidden text-gray-500">
+                              {question.type !== "poll" && question.correctAnswers.includes(optionIndex) ? "Correct" : "Option"}
+                            </span>
+                          </div>
+                          <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                             <Input
                               value={option}
                               onChange={(e) => updateOption(question.id, optionIndex, e.target.value)}
                               placeholder={`Option ${optionIndex + 1}`}
                               required={question.type !== "open-ended"}
+                              className="text-sm sm:text-base"
                             />
                             {question.options.length > 2 && question.type !== "true-false" && (
                               <Button
@@ -440,13 +453,15 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => removeOption(question.id, optionIndex)}
+                                className="w-full sm:w-auto"
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span className="ml-2 sm:hidden">Remove Option</span>
                               </Button>
                             )}
                           </div>
                           {question.type !== "poll" && (
-                            <span className="text-sm text-gray-500 min-w-fit">
+                            <span className="hidden sm:block text-sm text-gray-500 min-w-fit">
                               {question.correctAnswers.includes(optionIndex) ? "(Correct)" : ""}
                             </span>
                           )}
@@ -469,23 +484,23 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
           </div>
 
           {/* Submit */}
-          <div className="flex justify-end space-x-4">
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
             <Link href="/dashboard">
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" className="w-full sm:w-auto">
                 Cancel
               </Button>
             </Link>
             <Dialog open={showPreview} onOpenChange={setShowPreview}>
               <DialogTrigger asChild>
-                <Button type="button" variant="outline" disabled={!title || questions.some(q => !q.question)}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  Preview
+                <Button type="button" variant="outline" disabled={!title || questions.some(q => !q.question)} className="w-full sm:w-auto">
+                  <Eye className="h-4 w-4 sm:mr-2" />
+                  <span className="ml-2 sm:ml-0">Preview</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>{title || "Quiz Preview"}</DialogTitle>
-                  <DialogDescription>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto mx-4 sm:mx-auto">
+                <DialogHeader className="pb-3 sm:pb-6">
+                  <DialogTitle className="text-lg sm:text-xl">{title || "Quiz Preview"}</DialogTitle>
+                  <DialogDescription className="text-sm sm:text-base">
                     {description || "Preview how your quiz will look to participants"}
                   </DialogDescription>
                 </DialogHeader>
@@ -517,11 +532,11 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                       </div>
                       
                       <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">
+                        <CardHeader className="pb-3 sm:pb-6">
+                          <CardTitle className="text-base sm:text-lg">
                             {questions[currentPreviewQuestion]?.question || "Question text"}
                           </CardTitle>
-                          <div className="flex items-center justify-between text-sm text-gray-500">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm text-gray-500 gap-1 sm:gap-0">
                             <span>Type: {questions[currentPreviewQuestion]?.type}</span>
                             <span>Points: {questions[currentPreviewQuestion]?.settings.points}</span>
                           </div>
@@ -530,11 +545,11 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                           {questions[currentPreviewQuestion]?.type === "open-ended" ? (
                             <Textarea placeholder="Participant would type their answer here..." disabled />
                           ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                               {questions[currentPreviewQuestion]?.options.map((option, index) => (
-                                <div key={index} className="flex items-center space-x-3">
+                                <div key={index} className="flex items-start space-x-2 sm:space-x-3 p-2 sm:p-0">
                                   {questions[currentPreviewQuestion]?.type === "multiple-choice" ? (
-                                    <Checkbox disabled />
+                                    <Checkbox disabled className="shrink-0 mt-0.5" />
                                   ) : (
                                     <input 
                                       type="radio"
@@ -542,11 +557,12 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                                       disabled 
                                       title={`Preview option ${index + 1}`}
                                       aria-label={`Preview option ${index + 1}`}
+                                      className="shrink-0 mt-1"
                                     />
                                   )}
-                                  <span className={`${questions[currentPreviewQuestion]?.correctAnswers.includes(index) ? 'text-green-600 font-medium' : ''}`}>
+                                  <span className={`text-sm sm:text-base ${questions[currentPreviewQuestion]?.correctAnswers.includes(index) ? 'text-green-600 font-medium' : ''}`}>
                                     {option || `Option ${index + 1}`}
-                                    {questions[currentPreviewQuestion]?.correctAnswers.includes(index) && " ✓"}
+                                    {questions[currentPreviewQuestion]?.correctAnswers.includes(index) && <span className="text-xs sm:text-sm"> ✓</span>}
                                   </span>
                                 </div>
                               ))}
@@ -559,8 +575,8 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                 </div>
               </DialogContent>
             </Dialog>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Creating..." : "Create Quiz"}
+            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+              <span className="ml-2 sm:ml-0">{isLoading ? "Creating..." : "Create Quiz"}</span>
             </Button>
           </div>
         </form>

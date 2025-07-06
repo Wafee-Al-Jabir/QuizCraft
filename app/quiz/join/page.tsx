@@ -1,6 +1,7 @@
 "use client"
 
 import { QuizParticipant } from "@/components/quiz/quiz-participant"
+import { SimpleThemeToggle } from "@/components/ui/theme-toggle"
 import { useRouter } from "next/navigation"
 
 export default function QuizJoinPage() {
@@ -11,7 +12,10 @@ export default function QuizJoinPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <div className="absolute top-4 right-4 z-10">
+        <SimpleThemeToggle />
+      </div>
       <QuizParticipant onClose={handleClose} />
     </div>
   )

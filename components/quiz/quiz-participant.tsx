@@ -100,6 +100,9 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
     // Listen for answer submission result
     socket.on('answer-submitted', (data) => {
       console.log('Answer submitted result:', data)
+      console.log('Previous score:', score, 'New total score:', data.totalScore)
+      console.log('Points earned this question:', data.points)
+      console.log('Is answer correct:', data.isCorrect)
       setScore(data.totalScore)
       setIsAnswered(true)
     })
@@ -197,8 +200,11 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
       answer: selectedAnswer,
       timeSpent,
       questionType: currentQuestion.question.type,
-      // Remove correctAnswers since it's not part of the question type
+      currentScore: score
     })
+    
+    console.log('Socket connected:', socket.connected)
+    console.log('Socket ID:', socket.id)
     
     socket.emit('submit-answer', {
       sessionCode,
@@ -206,6 +212,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
       answer: selectedAnswer,
       timeSpent
     })
+    
+    setIsAnswered(true) // Set answered immediately to prevent double submission
   }
 
   const handleAnswerChange = (value: string | boolean, optionIndex?: number) => {
@@ -237,7 +245,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardContent className="text-center py-8">
             <div className="text-lg font-medium text-gray-900 mb-2">Connecting...</div>
             <div className="text-sm text-gray-600">Please wait while we establish connection</div>
@@ -253,7 +261,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
     return (
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-2xl mx-auto">
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader className="text-center">
               <div className="flex items-center justify-center mb-4">
                 <Trophy className="h-12 w-12 text-yellow-500" />
@@ -304,8 +312,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
 
   if (!hasJoined) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
             <CardTitle>Join Quiz</CardTitle>
             <CardDescription>Enter the session code to join a live quiz</CardDescription>
@@ -360,8 +368,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
             <CardTitle>{quizInfo?.title}</CardTitle>
             <CardDescription>{quizInfo?.description}</CardDescription>
@@ -387,21 +395,21 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 sm:p-4 transition-colors duration-300">
       <div className="max-w-2xl mx-auto">
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
               <div>
-                <CardTitle>
+                <CardTitle className="text-lg sm:text-xl">
                   Question {currentQuestion.questionNumber} of {currentQuestion.totalQuestions}
                 </CardTitle>
-                <CardDescription>Score: {score} points</CardDescription>
+                <CardDescription className="text-sm sm:text-base">Score: {score} points</CardDescription>
               </div>
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4" />
-                <span className={`font-mono text-lg ${
-                  timeLeft <= 5 ? 'text-red-500' : timeLeft <= 10 ? 'text-yellow-500' : 'text-green-500'
+                <span className={`font-mono text-base sm:text-lg transition-all duration-300 ${
+                  timeLeft <= 5 ? 'text-red-500 animate-pulse font-bold' : timeLeft <= 10 ? 'text-yellow-500' : 'text-green-500'
                 }`}>
                   {timeLeft}s
                 </span>
@@ -409,12 +417,14 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
             </div>
             <Progress 
               value={(currentQuestion.questionNumber / currentQuestion.totalQuestions) * 100} 
-              className="w-full"
+              className="w-full mt-2"
             />
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              <div className="text-xl font-medium">{currentQuestion.question.text}</div>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="text-lg sm:text-xl font-medium leading-relaxed">
+                {currentQuestion.question.text || 'Question text not available'}
+              </div>
               
               {currentQuestion.question.type === 'single-choice' ? (
                 <RadioGroup 
@@ -423,11 +433,11 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                   disabled={isAnswered}
                 >
                   {currentQuestion.question.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <RadioGroupItem value={index.toString()} id={`option-${index}`} />
+                    <div key={index} className="flex items-start space-x-2 sm:space-x-3">
+                      <RadioGroupItem value={index.toString()} id={`option-${index}`} className="mt-1" />
                       <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                        <div className="p-3 rounded-lg border hover:bg-gray-50">
-                          <span className="font-medium text-gray-700">
+                        <div className="p-2 sm:p-3 rounded-lg border hover:bg-gray-50 transition-colors">
+                          <span className="text-sm sm:text-base font-medium text-gray-700">
                             {String.fromCharCode(65 + index)}. {option}
                           </span>
                         </div>
@@ -436,18 +446,19 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                   ))}
                 </RadioGroup>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {currentQuestion.question.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2">
+                    <div key={index} className="flex items-start space-x-2 sm:space-x-3">
                       <Checkbox 
                         id={`option-${index}`}
                         checked={(selectedAnswer as number[]).includes(index)}
                         onCheckedChange={(checked) => handleAnswerChange(checked, index)}
                         disabled={isAnswered}
+                        className="mt-1"
                       />
                       <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                        <div className="p-3 rounded-lg border hover:bg-gray-50">
-                          <span className="font-medium text-gray-700">
+                        <div className="p-2 sm:p-3 rounded-lg border hover:bg-gray-50 transition-colors">
+                          <span className="text-sm sm:text-base font-medium text-gray-700">
                             {String.fromCharCode(65 + index)}. {option}
                           </span>
                         </div>
@@ -457,8 +468,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                 </div>
               )}
 
-              <div className="flex justify-between items-center pt-4">
-                <div className="text-sm text-gray-600">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 pt-4">
+                <div className="text-xs sm:text-sm text-gray-600">
                   {isAnswered ? 'Answer submitted!' : 'Select your answer(s)'}
                 </div>
                 <Button 
@@ -467,6 +478,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                     (currentQuestion.question.type === 'single-choice' && selectedAnswer === 0 && !currentQuestion.question.options[0]) ||
                     (currentQuestion.question.type === 'multiple-choice' && (selectedAnswer as number[]).length === 0)
                   }
+                  className="w-full sm:w-auto"
                 >
                   {isAnswered ? 'Submitted' : 'Submit Answer'}
                 </Button>
@@ -477,26 +489,26 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
         
         {/* Active Poll */}
         {activePoll && (
-          <Card className="mt-6">
+          <Card className="mt-4 sm:mt-6">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2" />
+              <CardTitle className="flex items-center text-lg sm:text-xl">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Live Poll
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">{activePoll.question}</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold leading-relaxed">{activePoll.question}</h3>
                 
                 {!hasPollResponded ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     <RadioGroup value={pollResponse} onValueChange={setPollResponse}>
                       {activePoll.options.map((option, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <RadioGroupItem value={option} id={`poll-option-${index}`} />
+                        <div key={index} className="flex items-start space-x-2 sm:space-x-3">
+                          <RadioGroupItem value={option} id={`poll-option-${index}`} className="mt-1" />
                           <Label htmlFor={`poll-option-${index}`} className="flex-1 cursor-pointer">
-                            <div className="p-3 rounded-lg border hover:bg-gray-50">
-                              <span className="font-medium text-gray-700">{option}</span>
+                            <div className="p-2 sm:p-3 rounded-lg border hover:bg-gray-50 transition-colors">
+                              <span className="text-sm sm:text-base font-medium text-gray-700">{option}</span>
                             </div>
                           </Label>
                         </div>
@@ -512,10 +524,10 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-4">
-                    <div className="text-green-600 font-medium mb-2">✓ Response submitted!</div>
-                    <div className="text-sm text-gray-600">Your response: {pollResponse}</div>
-                    <div className="text-sm text-gray-500 mt-2">Waiting for poll results...</div>
+                  <div className="text-center py-3 sm:py-4">
+                    <div className="text-green-600 font-medium mb-2 text-sm sm:text-base">✓ Response submitted!</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Your response: {pollResponse}</div>
+                    <div className="text-xs sm:text-sm text-gray-500 mt-2">Waiting for poll results...</div>
                   </div>
                 )}
               </div>
@@ -525,31 +537,31 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
         
         {/* Poll Results */}
         {pollResults && (
-          <Card className="mt-6">
+          <Card className="mt-4 sm:mt-6">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Trophy className="h-5 w-5 mr-2" />
+              <CardTitle className="flex items-center text-lg sm:text-xl">
+                <Trophy className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Poll Results
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">{pollResults.question}</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold leading-relaxed">{pollResults.question}</h3>
                 
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {Object.entries(pollResults.results).map(([option, votes]) => {
                     const totalVotes = Object.values(pollResults.results).reduce((sum, count) => sum + count, 0)
                     const percentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0
                     
                     return (
-                      <div key={option} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{option}</span>
-                          <span className="text-sm text-gray-600">{votes} votes ({percentage.toFixed(1)}%)</span>
+                      <div key={option} className="space-y-1 sm:space-y-2">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                          <span className="text-sm sm:text-base font-medium">{option}</span>
+                          <span className="text-xs sm:text-sm text-gray-600">{votes} votes ({percentage.toFixed(1)}%)</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3">
+                        <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
                           <div 
-                            className="bg-blue-500 h-3 rounded-full transition-all duration-300" 
+                            className="bg-blue-500 h-2 sm:h-3 rounded-full transition-all duration-300" 
                             style={{ width: `${percentage}%` }}
                           ></div>
                         </div>
@@ -558,14 +570,14 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                   })}
                 </div>
                 
-                <div className="text-center text-sm text-gray-600 mt-4">
+                <div className="text-center text-xs sm:text-sm text-gray-600 mt-3 sm:mt-4">
                   Total responses: {Object.values(pollResults.results).reduce((sum, count) => sum + count, 0)}
                 </div>
                 
                 <Button 
                   variant="outline" 
                   onClick={() => setPollResults(null)}
-                  className="w-full mt-4"
+                  className="w-full mt-3 sm:mt-4"
                 >
                   Close Results
                 </Button>

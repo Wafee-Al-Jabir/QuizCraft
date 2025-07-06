@@ -4,7 +4,7 @@ const next = require('next')
 const { Server } = require('socket.io')
 
 const dev = process.env.NODE_ENV !== 'production'
-const hostname = 'localhost'
+const hostname = '0.0.0.0'
 const port = process.env.PORT || 3000
 
 // when using middleware `hostname` and `port` must be provided below
@@ -27,7 +27,7 @@ app.prepare().then(() => {
 
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000'],
+      origin: process.env.NODE_ENV === 'production' ? false : true,
       methods: ['GET', 'POST']
     }
   })
@@ -177,10 +177,13 @@ app.prepare().then(() => {
       const correctAnswers = currentQuestion.correctAnswers || []
       
       console.log('Scoring debug:', {
+        participantId: socket.id,
+        participantName: participant.name,
         questionType: currentQuestion.type,
         answer,
         correctAnswers,
-        questionSettings: currentQuestion.settings
+        questionSettings: currentQuestion.settings,
+        previousScore: participant.score
       })
       
       if (currentQuestion.type === 'single-choice' || currentQuestion.type === 'true-false') {
@@ -200,7 +203,14 @@ app.prepare().then(() => {
         const timeLimit = currentQuestion.settings?.timeLimit || 30
         const timeBonus = Math.max(0, (timeLimit - timeSpent) / timeLimit)
         points = Math.round(basePoints + (timeBonus * basePoints * 0.5))
-        console.log('Points awarded:', points, 'Base:', basePoints, 'Time bonus:', timeBonus)
+        console.log('Points calculation:', {
+          basePoints,
+          timeLimit,
+          timeSpent,
+          timeBonus,
+          finalPoints: points,
+          participantName: participant.name
+        })
       }
       
       participant.answers.push({
@@ -211,6 +221,14 @@ app.prepare().then(() => {
         timeSpent
       })
       participant.score += points
+      
+      console.log('Score update:', {
+        participantName: participant.name,
+        participantId: socket.id,
+        pointsEarned: points,
+        newTotalScore: participant.score,
+        sessionCode
+      })
       
       socket.emit('answer-submitted', { isCorrect, points, totalScore: participant.score })
       

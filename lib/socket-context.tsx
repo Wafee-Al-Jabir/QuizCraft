@@ -31,7 +31,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Initialize socket connection
-    const socketInstance = io(process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000', {
+    const socketInstance = io(process.env.NODE_ENV === 'production' ? '' : window.location.origin, {
       transports: ['websocket', 'polling']
     })
 
