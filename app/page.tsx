@@ -36,7 +36,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-background dark:via-background/95 dark:to-background/90 transition-all duration-300">
       {/* Header */}
-      <header className="border-b border-gray-200 dark:border-border bg-white/80 dark:bg-card/80 backdrop-blur-md shadow-sm">
+      <header className="border-b border-gray-200 dark:border-border bg-black/80 dark:bg-card/80 backdrop-blur-md shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
@@ -48,7 +48,7 @@ export default function HomePage() {
             <SimpleThemeToggle />
             {isLoading ? (
               <div className="animate-pulse">
-                <div className="h-9 w-20 bg-gray-200 rounded"></div>
+                <div className="h-9 w-20 bg-black rounded"></div>
               </div>
             ) : user ? (
               <div className="flex items-center space-x-2 sm:space-x-4">
@@ -99,7 +99,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/dashboard" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-white/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-black/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-300 hover:scale-105">
                   Host Quiz
                 </Button>
               </Link>
@@ -117,7 +117,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/quiz/join" className="w-full sm:w-auto">
-                 <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-white/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-150 hover:scale-105">
+                 <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-black/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-150 hover:scale-105">
                    Join Quiz
                  </Button>
                </Link>

@@ -15,6 +15,7 @@ export interface QuizQuestion {
   id: string
   type: QuestionType
   question: string
+  image?: string // Optional image URL or file path
   options: string[]
   correctAnswers: number[] // Changed to support multiple correct answers
   settings: {

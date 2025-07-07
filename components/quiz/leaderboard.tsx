@@ -34,8 +34,8 @@ export function Leaderboard({
                 participant.id === currentParticipantId
                   ? "bg-indigo-100 border border-indigo-300"
                   : index % 2 === 0
-                    ? "bg-gray-50"
-                    : "bg-white"
+                      ? "bg-gray-800 dark:bg-gray-700"
+                      : "bg-gray-700 dark:bg-gray-600"
               }`}
             >
               <div className="flex items-center min-w-0 flex-1">

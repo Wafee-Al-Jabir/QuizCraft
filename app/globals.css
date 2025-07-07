@@ -52,38 +52,38 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
-    --background: 222 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222 84% 4.9%;
-    --secondary: 217 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 32.6% 17.5%;
-    --input: 217 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 222 84% 4.9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217.2 91.2% 59.8%;
-    --sidebar-primary-foreground: 222 84% 4.9%;
-    --sidebar-accent: 217 32.6% 17.5%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 32.6% 17.5%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 0% 20%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 10%;
+    --ring: 0 0% 50%;
+    --chart-1: 0 0% 30%;
+    --chart-2: 0 0% 40%;
+    --chart-3: 0 0% 50%;
+    --chart-4: 0 0% 60%;
+    --chart-5: 0 0% 70%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 0 0% 50%;
   }
 }
 
@@ -96,64 +96,50 @@ body {
     @apply bg-background text-foreground;
   }
   
-  /* Enhanced dark mode styling */
+  /* Simple black and white dark mode styling */
   .dark {
-    background: linear-gradient(135deg, hsl(222, 84%, 4.9%) 0%, hsl(222, 84%, 3.5%) 100%);
+    background: hsl(0, 0%, 0%);
   }
   
   .dark .bg-card {
-    background: linear-gradient(135deg, hsl(222, 84%, 5.5%) 0%, hsl(222, 84%, 4.2%) 100%);
-    border: 1px solid hsl(217, 32.6%, 20%);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    background: hsl(0, 0%, 5%);
+    border: 1px solid hsl(0, 0%, 20%);
   }
   
-  .dark .shadow-lg {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  }
-  
-  .dark .shadow-md {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  }
-  
-  .dark .shadow-sm {
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Enhanced button styling for dark mode */
+  /* Simple button styling for dark mode */
   .dark .bg-primary {
-    background: linear-gradient(135deg, hsl(217.2, 91.2%, 59.8%) 0%, hsl(217.2, 91.2%, 55%) 100%);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-    color: hsl(0, 0%, 100%);
+    background: hsl(0, 0%, 100%);
+    color: hsl(0, 0%, 0%);
   }
   
   .dark .bg-primary:hover {
-    background: linear-gradient(135deg, hsl(217.2, 91.2%, 65%) 0%, hsl(217.2, 91.2%, 60%) 100%);
-    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
-    color: hsl(0, 0%, 100%);
+    background: hsl(0, 0%, 90%);
+    color: hsl(0, 0%, 0%);
   }
   
-  /* Improved text contrast */
+  /* Simple text contrast */
   .dark .text-muted-foreground {
-    color: hsl(215, 20.2%, 75%);
+    color: hsl(0, 0%, 70%);
   }
   
   .dark .text-gray-600 {
-    color: hsl(215, 20.2%, 80%);
+    color: hsl(0, 0%, 70%);
   }
   
   .dark .text-gray-300 {
-    color: hsl(215, 20.2%, 85%);
+    color: hsl(0, 0%, 80%);
   }
   
-  /* Enhanced input styling for dark mode */
+  /* Simple input styling for dark mode */
   .dark input, .dark textarea, .dark select {
-    background: linear-gradient(135deg, hsl(217, 32.6%, 18%) 0%, hsl(217, 32.6%, 16%) 100%);
-    border: 1px solid hsl(217, 32.6%, 22%);
+    background: hsl(0, 0%, 10%);
+    border: 1px solid hsl(0, 0%, 30%);
+    color: hsl(0, 0%, 100%);
   }
   
   .dark input:focus, .dark textarea:focus, .dark select:focus {
-    border-color: hsl(217.2, 91.2%, 59.8%);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: hsl(0, 0%, 50%);
+    box-shadow: 0 0 0 2px hsl(0, 0%, 20%);
   }
   
   /* Smooth transitions for theme changes */

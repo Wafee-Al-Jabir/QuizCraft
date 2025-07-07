@@ -40,6 +40,7 @@ interface QuestionData {
     type: string
     options: string[]
     timeLimit: number
+    image?: string
   }
 }
 
@@ -158,7 +159,8 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
         text: quiz.questions[0].question,
         type: quiz.questions[0].type,
         options: quiz.questions[0].options,
-        timeLimit: quiz.questions[0].settings?.timeLimit || 30
+        timeLimit: quiz.questions[0].settings?.timeLimit || 30,
+        image: quiz.questions[0].image
       }
     }
     setCurrentQuestion(firstQuestion)
@@ -183,7 +185,8 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
           text: nextQ.question,
           type: nextQ.type,
           options: nextQ.options,
-          timeLimit: nextQ.settings?.timeLimit || 30
+          timeLimit: nextQ.settings?.timeLimit || 30,
+          image: nextQ.image
         }
       }
       setCurrentQuestion(nextQuestionData)
@@ -243,7 +246,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300 font-['Poppins']">
+      <div className="min-h-screen bg-black dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300 font-['Poppins']">
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardContent className="text-center py-6 sm:py-8">
             <div className="text-base sm:text-lg font-medium text-gray-900 mb-2">Connecting...</div>
@@ -256,7 +259,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
 
   if (isQuizFinished) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3 sm:p-4 transition-colors duration-300 font-['Poppins']">
+      <div className="min-h-screen bg-black dark:bg-gray-900 p-3 sm:p-4 transition-colors duration-300 font-['Poppins']">
         <div className="max-w-4xl mx-auto">
           <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader className="text-center">
@@ -270,17 +273,17 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
               <div className="space-y-3 sm:space-y-4">
                 <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Final Leaderboard</h3>
                 {leaderboard.map((participant, index) => (
-                  <div key={participant.id} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-2 sm:space-x-3">
-                      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base ${
-                        index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-400' : 'bg-gray-300'
-                      }`}>
-                        {index + 1}
-                      </div>
-                      <span className="font-medium text-sm sm:text-base">{participant.name}</span>
-                    </div>
-                    <Badge variant="secondary" className="text-xs sm:text-sm">{participant.score} points</Badge>
-                  </div>
+                  <div key={participant.id} className="flex items-center justify-between p-3 sm:p-4 bg-gray-800 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center space-x-2 sm:space-x-3">
+                              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base ${
+                                index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-600' : index === 2 ? 'bg-orange-400' : 'bg-gray-700'
+                              }`}>
+                                {index + 1}
+                              </div>
+                              <span className="font-medium text-sm sm:text-base text-white">{participant.name}</span>
+                            </div>
+                            <Badge variant="secondary" className="text-xs sm:text-sm">{participant.score} points</Badge>
+                          </div>
                 ))}
               </div>
               <div className="mt-4 sm:mt-6 flex justify-center">
@@ -294,18 +297,18 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3 sm:p-4 transition-colors duration-300 font-['Poppins']">
+    <div className="min-h-screen bg-black dark:bg-gray-900 p-3 sm:p-4 transition-colors duration-300 font-['Poppins']">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
           <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{quiz.title}</h1>
-            <p className="text-sm sm:text-base text-gray-600">{quiz.description}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">{quiz.title}</h1>
+            <p className="text-sm sm:text-base text-gray-300">{quiz.description}</p>
           </div>
           <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
             {sessionCode && (
               <div className="text-center">
-                <div className="text-xs sm:text-sm text-gray-600">Session Code</div>
+                <div className="text-xs sm:text-sm text-gray-300">Session Code</div>
                 <div className="text-xl sm:text-2xl font-bold text-indigo-600">{sessionCode}</div>
               </div>
             )}
@@ -363,10 +366,20 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                   <div className="space-y-4 sm:space-y-6">
                     <div className="text-lg sm:text-xl font-medium leading-relaxed">{currentQuestion.question.text}</div>
                     
+                    {(currentQuestion.question as any).image && (
+                      <div className="flex justify-center">
+                        <img 
+                          src={(currentQuestion.question as any).image}
+                          alt="Question image" 
+                          className="max-w-full h-auto max-h-64 rounded-lg"
+                        />
+                      </div>
+                    )}
+                    
                     <div className="grid gap-2 sm:gap-3">
                       {currentQuestion.question.options.map((option, index) => (
-                        <div key={index} className="p-2 sm:p-3 bg-gray-50 rounded-lg border">
-                          <span className="text-sm sm:text-base font-medium text-gray-700">
+                        <div key={index} className="p-2 sm:p-3 bg-gray-800 dark:bg-gray-700 rounded-lg border border-gray-700">
+                          <span className="text-sm sm:text-base font-medium text-white">
                             {String.fromCharCode(65 + index)}. {option}
                           </span>
                         </div>
@@ -423,14 +436,14 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                       {participants
                         .sort((a, b) => b.score - a.score)
                         .map((participant, index) => (
-                          <div key={participant.id} className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border">
+                          <div key={participant.id} className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg border border-gray-600">
                             <div className="flex items-center space-x-2 sm:space-x-3">
                               <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg ${
-                                index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-400' : 'bg-gray-300'
+                                index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-600' : index === 2 ? 'bg-orange-400' : 'bg-gray-700'
                               }`}>
                                 {index + 1}
                               </div>
-                              <span className="font-semibold text-sm sm:text-lg">{participant.name}</span>
+                              <span className="font-semibold text-sm sm:text-lg text-white">{participant.name}</span>
                             </div>
                             <Badge variant="secondary" className="text-sm sm:text-lg px-2 sm:px-3 py-1">
                               {participant.score} points
@@ -454,7 +467,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                                 <span className="text-sm sm:text-base font-medium">{option}</span>
                                 <span className="text-xs sm:text-sm text-gray-600">{votes} votes ({percentage.toFixed(1)}%)</span>
                               </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+                              <div className="w-full bg-black rounded-full h-2 sm:h-3">
                                 <div 
                                   className="bg-blue-500 h-2 sm:h-3 rounded-full transition-all duration-300" 
                                   style={{ width: `${percentage}%` }}
@@ -493,12 +506,12 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                     participants
                       .sort((a, b) => b.score - a.score)
                       .map((participant, index) => (
-                        <div key={participant.id} className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg">
+                        <div key={participant.id} className="flex items-center justify-between p-2 sm:p-3 bg-gray-800 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center space-x-2">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-medium">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
                               {index + 1}
                             </div>
-                            <span className="font-medium text-xs sm:text-sm">{participant.name}</span>
+                            <span className="font-medium text-xs sm:text-sm text-white">{participant.name}</span>
                             {answeredParticipants.has(participant.id) && (
                               <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                             )}

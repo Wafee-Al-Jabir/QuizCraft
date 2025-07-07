@@ -140,7 +140,8 @@ app.prepare().then(() => {
             options: question.options,
             timeLimit: question.settings?.timeLimit || 30,
             correctAnswers: question.correctAnswers,
-            settings: question.settings
+            settings: question.settings,
+            image: question.image
           }
         }
       
@@ -280,7 +281,8 @@ app.prepare().then(() => {
             options: question.options,
             timeLimit: question.settings?.timeLimit || 30,
             correctAnswers: question.correctAnswers,
-            settings: question.settings
+            settings: question.settings,
+            image: question.image
           }
         }
         

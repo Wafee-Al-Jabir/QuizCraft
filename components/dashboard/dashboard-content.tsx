@@ -109,7 +109,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-background dark:to-background/95 transition-all duration-300">
       {/* Header */}
-      <header className="bg-white/80 dark:bg-card/80 backdrop-blur-md border-b border-gray-200 dark:border-border shadow-sm">
+      <header className="bg-black/80 dark:bg-card/80 backdrop-blur-md border-b border-gray-200 dark:border-border shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">

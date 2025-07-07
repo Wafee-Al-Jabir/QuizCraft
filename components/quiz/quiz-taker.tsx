@@ -233,7 +233,7 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
   // Name entry screen
   if (!isNameEntered) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors duration-300">
+      <div className="min-h-screen bg-black dark:bg-gray-900 flex items-center justify-center transition-colors duration-300">
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="text-2xl text-center">{quiz.title}</CardTitle>
@@ -268,7 +268,7 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
 
     return (
       <>
-        <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 transition-colors duration-300">
+        <header className="bg-black dark:bg-gray-800 border-b dark:border-gray-700 transition-colors duration-300">
           <div className="container mx-auto px-4 py-4 flex items-center space-x-4">
             <Link href="/dashboard">
               <Button variant="ghost" size="sm">
@@ -310,7 +310,7 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
                       <div
                         key={participant.id}
                         className={`flex items-center justify-between p-3 rounded-lg ${
-                          participant.id === participantId ? "bg-indigo-100 border border-indigo-300" : "bg-gray-50"
+                          participant.id === participantId ? "bg-indigo-600 border border-indigo-400 text-white" : "bg-black dark:bg-gray-900"
                         }`}
                       >
                         <div className="flex items-center">
@@ -335,14 +335,23 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
               <div className="space-y-4 mt-6">
                 <h3 className="text-lg font-semibold">Review Your Answers</h3>
                 {quizQuestions.map((question, index) => (
-                  <div key={question.id} className="text-left p-4 bg-gray-50 rounded-lg">
+                  <div key={question.id} className="text-left p-4 bg-black dark:bg-gray-900 rounded-lg text-white">
                     <div className="font-medium mb-2">
                       {index + 1}. {question.question}
                     </div>
+                    {question.image && (
+                      <div className="mb-3">
+                        <img 
+                          src={question.image} 
+                          alt="Question image" 
+                          className="max-w-full h-auto max-h-32 rounded-lg"
+                        />
+                      </div>
+                    )}
                     {question.type === "open-ended" ? (
                       <div className="text-sm">
                         <div className="font-medium">Your answer:</div>
-                        <div className="p-2 bg-white border rounded mt-1">{textAnswers[index] || "Not answered"}</div>
+                        <div className="p-2 bg-gray-800 dark:bg-gray-700 border border-gray-600 rounded mt-1 text-white">{textAnswers[index] || "Not answered"}</div>
                       </div>
                     ) : question.type === "poll" ? (
                       <div className="text-sm">
@@ -400,11 +409,11 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
   if (showLeaderboard) {
     return (
       <>
-        <header className="bg-white border-b">
+        <header className="bg-black border-b border-gray-800">
           <div className="container mx-auto px-4 py-4 flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <BookOpen className="h-6 w-6 text-indigo-600" />
-              <h1 className="text-xl font-bold text-gray-900">{quiz.title}</h1>
+              <BookOpen className="h-6 w-6 text-white" />
+              <h1 className="text-xl font-bold text-white">{quiz.title}</h1>
             </div>
           </div>
         </header>
@@ -426,8 +435,8 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
                     participant.id === participantId
                       ? "bg-indigo-100 border border-indigo-300"
                       : index % 2 === 0
-                        ? "bg-gray-50"
-                        : "bg-white"
+                          ? "bg-gray-800 dark:bg-gray-700"
+                          : "bg-gray-700 dark:bg-gray-600"
                   }`}
                 >
                   <div className="flex items-center">
@@ -466,7 +475,7 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
 
   return (
     <>
-      <header className="bg-white border-b">
+      <header className="bg-black border-b border-gray-800">
         <div className="container mx-auto px-4 py-4 flex items-center space-x-4">
           <Link href="/dashboard">
             <Button variant="ghost" size="sm">
@@ -475,13 +484,13 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
             </Button>
           </Link>
           <div className="flex items-center space-x-2">
-            <BookOpen className="h-6 w-6 text-indigo-600" />
-            <h1 className="text-xl font-bold text-gray-900">{quiz.title}</h1>
+            <BookOpen className="h-6 w-6 text-white" />
+            <h1 className="text-xl font-bold text-white">{quiz.title}</h1>
           </div>
           {timeLeft !== null && (
             <div className="ml-auto flex items-center space-x-2">
-              <Timer className={`h-5 w-5 ${timeLeft < 5 ? "text-red-500" : "text-gray-500"}`} />
-              <span className={`font-mono font-bold ${timeLeft < 5 ? "text-red-500" : "text-gray-700"}`}>
+              <Timer className={`h-5 w-5 ${timeLeft < 5 ? "text-red-500" : "text-gray-400"}`} />
+              <span className={`font-mono font-bold ${timeLeft < 5 ? "text-red-500" : "text-white"}`}>
                 {timeLeft}s
               </span>
             </div>
@@ -503,6 +512,15 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">{question.question}</CardTitle>
+            {question.image && (
+              <div className="mt-4">
+                <img 
+                  src={question.image} 
+                  alt="Question image" 
+                  className="max-w-full h-auto max-h-64 rounded-lg mx-auto"
+                />
+              </div>
+            )}
             {question.type === "poll" && <CardDescription>Poll question - choose your answer</CardDescription>}
             {question.type === "multiple-choice" && <CardDescription>Select all correct answers</CardDescription>}
           </CardHeader>

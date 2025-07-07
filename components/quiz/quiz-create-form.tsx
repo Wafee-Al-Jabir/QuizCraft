@@ -74,6 +74,36 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
     setQuestions(questions.map((q) => (q.id === id ? { ...q, [field]: value } : q)))
   }
 
+  const handleImageUpload = (questionId: string, file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const imageUrl = e.target?.result as string
+      updateQuestion(questionId, 'image', imageUrl)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleImagePaste = (questionId: string, event: React.ClipboardEvent) => {
+    const items = event.clipboardData?.items
+    if (!items) return
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      if (item.type.startsWith('image/')) {
+        event.preventDefault()
+        const file = item.getAsFile()
+        if (file) {
+          handleImageUpload(questionId, file)
+        }
+        break
+      }
+    }
+  }
+
+  const removeImage = (questionId: string) => {
+    updateQuestion(questionId, 'image', undefined)
+  }
+
   const updateQuestionSettings = (id: string, field: string, value: any) => {
     setQuestions(questions.map((q) => (q.id === id ? { ...q, settings: { ...q.settings, [field]: value } } : q)))
   }
@@ -187,7 +217,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
   return (
     <>
       {/* Header */}
-      <header className="bg-white border-b">
+      <header className="bg-black border-b border-gray-800">
         <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
             <div className="flex items-center space-x-2 sm:space-x-4">
@@ -198,8 +228,8 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                 </Button>
               </Link>
               <div className="flex items-center space-x-2">
-                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-600" />
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900">Create New Quiz</h1>
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <h1 className="text-lg sm:text-xl font-bold text-white">Create New Quiz</h1>
               </div>
             </div>
           </div>
@@ -251,8 +281,8 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
               </div>
 
               {showQuizSettings && (
-                <div className="mt-3 sm:mt-4 p-3 sm:p-4 border rounded-md bg-gray-50">
-                  <h3 className="text-sm font-medium mb-3">Quiz Settings</h3>
+                <div className="mt-3 sm:mt-4 p-3 sm:p-4 border border-gray-700 rounded-md bg-gray-900">
+                  <h3 className="text-sm font-medium mb-3 text-white">Quiz Settings</h3>
                   <div className="space-y-3 sm:space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
                       <div className="space-y-0.5 flex-1">
@@ -324,10 +354,83 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                     <Textarea
                       value={question.question}
                       onChange={(e) => updateQuestion(question.id, "question", e.target.value)}
-                      placeholder="Enter your question"
-                      required
+                      onPaste={(e) => handleImagePaste(question.id, e)}
+                      placeholder="Enter your question (you can paste images with Ctrl+V)"
+                      rows={2}
                       className="text-sm sm:text-base"
                     />
+                  </div>
+
+                  {/* Image Upload Section */}
+                  <div className="space-y-2">
+                    <Label className="text-sm sm:text-base">Question Image (Optional)</Label>
+                    <div className="border-2 border-dashed border-gray-700 rounded-lg p-4 bg-black">
+                      {question.image ? (
+                        <div className="space-y-2">
+                          <img 
+                            src={question.image} 
+                            alt="Question image" 
+                            className="max-w-full h-auto max-h-48 rounded-lg mx-auto"
+                          />
+                          <div className="flex justify-center space-x-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                              const input = document.createElement('input')
+                              input.type = 'file'
+                              input.accept = 'image/*'
+                              input.onchange = (e) => {
+                                const target = e.target as HTMLInputElement
+                                const file = target.files?.[0]
+                                if (file) {
+                                  handleImageUpload(question.id, file)
+                                }
+                              }
+                              input.click()
+                            }}
+                            >
+                              Change Image
+                            </Button>
+                            <Button
+                               type="button"
+                               variant="outline"
+                               size="sm"
+                               onClick={() => removeImage(question.id)}
+                             >
+                               Remove Image
+                             </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              const input = document.createElement('input')
+                              input.type = 'file'
+                              input.accept = 'image/*'
+                              input.onchange = (e) => {
+                                const target = e.target as HTMLInputElement
+                                const file = target.files?.[0]
+                                if (file) {
+                                  handleImageUpload(question.id, file)
+                                }
+                              }
+                              input.click()
+                            }}
+                          >
+                            Upload Image
+                          </Button>
+                          <p className="text-sm text-gray-500 mt-2">
+                            Supported formats: JPG, PNG, GIF, WebP (Max 5MB)<br/>
+                            You can also paste images with Ctrl+V in the question text area
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -471,8 +574,8 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                   )}
 
                   {question.type === "open-ended" && (
-                    <div className="p-4 border rounded-md bg-gray-50">
-                      <p className="text-sm text-gray-600">
+                    <div className="p-4 border border-gray-700 rounded-md bg-gray-900">
+                      <p className="text-sm text-gray-400">
                         Open-ended questions allow participants to enter free-form text responses. These responses will
                         be collected but not automatically scored.
                       </p>

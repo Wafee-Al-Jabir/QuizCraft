@@ -33,6 +33,7 @@ interface QuestionData {
     type: string
     options: string[]
     timeLimit: number
+    image?: string
   }
 }
 
@@ -83,6 +84,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
 
     // Listen for quiz start
     socket.on('quiz-started', (data) => {
+      console.log('Quiz started - received question data:', data)
+      console.log('Question image:', data.question?.image)
       setCurrentQuestion(data)
       setTimeLeft(data.question.timeLimit)
       setIsAnswered(false)
@@ -91,6 +94,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
 
     // Listen for next question
     socket.on('next-question', (data) => {
+      console.log('Next question - received question data:', data)
+      console.log('Question image:', data.question?.image)
       setCurrentQuestion(data)
       setTimeLeft(data.question.timeLimit)
       setIsAnswered(false)
@@ -244,7 +249,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardContent className="text-center py-8">
             <div className="text-lg font-medium text-gray-900 mb-2">Connecting...</div>
@@ -259,7 +264,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
     const myPosition = leaderboard.findIndex(p => p.name === participantName) + 1
     
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="min-h-screen bg-black p-4">
         <div className="max-w-2xl mx-auto">
           <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader className="text-center">
@@ -278,12 +283,12 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                   <div 
                     key={participant.id} 
                     className={`flex items-center justify-between p-4 rounded-lg ${
-                      participant.name === participantName ? 'bg-indigo-50 border-2 border-indigo-200' : 'bg-gray-50'
+                      participant.name === participantName ? 'bg-indigo-600 border-2 border-indigo-400 text-white' : 'bg-black dark:bg-gray-900 text-white'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
-                        index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-400' : 'bg-gray-300'
+                        index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-600' : index === 2 ? 'bg-orange-400' : 'bg-gray-700'
                       }`}>
                         {index + 1}
                       </div>
@@ -312,7 +317,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
 
   if (!hasJoined) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
+      <div className="min-h-screen bg-black dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
             <CardTitle>Join Quiz</CardTitle>
@@ -368,7 +373,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
+      <div className="min-h-screen bg-black dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
             <CardTitle>{quizInfo?.title}</CardTitle>
@@ -395,7 +400,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 sm:p-4 transition-colors duration-300">
+    <div className="min-h-screen bg-black dark:bg-gray-900 p-2 sm:p-4 transition-colors duration-300">
       <div className="max-w-2xl mx-auto">
         <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
@@ -408,9 +413,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
               </div>
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4" />
-                <span className={`font-mono text-base sm:text-lg transition-all duration-300 ${
-                  timeLeft <= 5 ? 'text-red-500 animate-pulse font-bold' : timeLeft <= 10 ? 'text-yellow-500' : 'text-green-500'
-                }`}>
+                <span className="font-mono text-xl sm:text-2xl text-white animate-pulse font-bold transition-all duration-300">
                   {timeLeft}s
                 </span>
               </div>
@@ -426,6 +429,22 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                 {currentQuestion.question.text || 'Question text not available'}
               </div>
               
+              {(() => {
+                const imageUrl = (currentQuestion.question as any).image
+                console.log('Rendering image check:', { imageUrl, hasImage: !!imageUrl })
+                return imageUrl && (
+                  <div className="flex justify-center">
+                    <img 
+                      src={imageUrl} 
+                      alt="Question image" 
+                      className="max-w-full h-auto rounded-lg border border-gray-700 max-h-[300px]"
+                      onLoad={() => console.log('Image loaded successfully:', imageUrl)}
+                      onError={(e) => console.error('Image failed to load:', imageUrl, e)}
+                    />
+                  </div>
+                )
+              })()}
+              
               {currentQuestion.question.type === 'single-choice' ? (
                 <RadioGroup 
                   value={selectedAnswer.toString()} 
@@ -436,8 +455,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                     <div key={index} className="flex items-start space-x-2 sm:space-x-3">
                       <RadioGroupItem value={index.toString()} id={`option-${index}`} className="mt-1" />
                       <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                        <div className="p-2 sm:p-3 rounded-lg border hover:bg-gray-50 transition-colors">
-                          <span className="text-sm sm:text-base font-medium text-gray-700">
+                        <div className="p-2 sm:p-3 rounded-lg border hover:bg-gray-800 transition-colors bg-black dark:bg-gray-900 text-white">
+                          <span className="text-sm sm:text-base font-medium text-white">
                             {String.fromCharCode(65 + index)}. {option}
                           </span>
                         </div>
@@ -454,11 +473,11 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                         checked={(selectedAnswer as number[]).includes(index)}
                         onCheckedChange={(checked) => handleAnswerChange(checked, index)}
                         disabled={isAnswered}
-                        className="mt-1"
+                        className="mt-[10px]"
                       />
                       <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                        <div className="p-2 sm:p-3 rounded-lg border hover:bg-gray-50 transition-colors">
-                          <span className="text-sm sm:text-base font-medium text-gray-700">
+                        <div className="p-2 sm:p-3 rounded-lg border hover:bg-gray-800 transition-colors bg-black dark:bg-gray-900 text-white">
+                          <span className="text-sm sm:text-base font-medium text-white">
                             {String.fromCharCode(65 + index)}. {option}
                           </span>
                         </div>
@@ -507,8 +526,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                         <div key={index} className="flex items-start space-x-2 sm:space-x-3">
                           <RadioGroupItem value={option} id={`poll-option-${index}`} className="mt-1" />
                           <Label htmlFor={`poll-option-${index}`} className="flex-1 cursor-pointer">
-                            <div className="p-2 sm:p-3 rounded-lg border hover:bg-gray-50 transition-colors">
-                              <span className="text-sm sm:text-base font-medium text-gray-700">{option}</span>
+                            <div className="p-2 sm:p-3 rounded-lg border hover:bg-gray-800 transition-colors bg-black dark:bg-gray-900 text-white">
+                              <span className="text-sm sm:text-base font-medium text-white">{option}</span>
                             </div>
                           </Label>
                         </div>
@@ -559,7 +578,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                           <span className="text-sm sm:text-base font-medium">{option}</span>
                           <span className="text-xs sm:text-sm text-gray-600">{votes} votes ({percentage.toFixed(1)}%)</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+                        <div className="w-full bg-black rounded-full h-2 sm:h-3">
                           <div 
                             className="bg-blue-500 h-2 sm:h-3 rounded-full transition-all duration-300" 
                             style={{ width: `${percentage}%` }}
