@@ -116,11 +116,11 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
       if (question.type === "single-choice" || question.type === "true-false") {
         isCorrect = selectedOptions.length === 1 && question.correctAnswers.includes(selectedOptions[0])
       } else if (question.type === "multiple-choice") {
-        // For multiple choice, all correct options must be selected and no incorrect ones
-        const allCorrectSelected = question.correctAnswers.every((idx) => selectedOptions.includes(idx))
-        const noIncorrectSelected = selectedOptions.every((idx) => question.correctAnswers.includes(idx))
-        isCorrect = allCorrectSelected && noIncorrectSelected
-      }
+          // For multiple choice, all correct options must be selected and no incorrect ones
+          const allCorrectSelected = question.correctAnswers.every((idx) => selectedOptions.includes(idx))
+          const noIncorrectSelected = selectedOptions.every((idx) => question.correctAnswers.includes(idx))
+          isCorrect = allCorrectSelected && noIncorrectSelected && selectedOptions.length > 0
+        }
 
       // Calculate points based on correctness and time
       if (isCorrect) {
@@ -129,7 +129,7 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
         // Bonus points for fast answers if there's a time limit
         if (question.settings.timeLimit && timeToAnswer < question.settings.timeLimit) {
           const timeBonus = Math.floor((1 - timeToAnswer / question.settings.timeLimit) * 5)
-          pointsEarned += timeBonus
+          pointsEarned = question.settings.points + timeBonus
         }
       }
     }
@@ -208,7 +208,7 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
           const allCorrectSelected = question.correctAnswers.every((idx) => selectedOptions.includes(idx))
           const noIncorrectSelected = selectedOptions.every((idx) => question.correctAnswers.includes(idx))
 
-          if (allCorrectSelected && noIncorrectSelected) {
+          if (allCorrectSelected && noIncorrectSelected && selectedOptions.length > 0) {
             correct++
             totalPoints += question.settings.points
           }

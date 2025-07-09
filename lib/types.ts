@@ -97,3 +97,33 @@ export interface QuizDocument extends Omit<Quiz, "id" | "userId"> {
 export interface QuizParticipantDocument extends Omit<QuizParticipant, "id"> {
   _id?: ObjectId
 }
+
+// Badge System
+export type BadgeType = "quiz_creator" | "quiz_master" | "participant" | "streak" | "perfectionist" | "speed_demon" | "social_butterfly" | "explorer" | "achievement"
+
+export interface Badge {
+  id: string
+  type: BadgeType
+  name: string
+  description: string
+  icon: string
+  color: string
+  requirement: {
+    type: "quiz_count" | "question_count" | "participant_count" | "perfect_score" | "speed" | "streak" | "exploration"
+    value: number
+    condition?: string
+  }
+  rarity: "common" | "rare" | "epic" | "legendary"
+  unlockedAt?: string
+}
+
+export interface UserBadge {
+  badgeId: string
+  unlockedAt: string
+  progress?: number
+  maxProgress?: number
+}
+
+export interface UserWithBadges extends User {
+  badges: UserBadge[]
+}

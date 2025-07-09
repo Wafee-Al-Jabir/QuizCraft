@@ -39,7 +39,7 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
       options: ["", "", "", ""],
       correctAnswers: [0],
       settings: {
-        points: 10,
+        points: 1000,
         showLeaderboardAfter: false,
         timeLimit: undefined
       },

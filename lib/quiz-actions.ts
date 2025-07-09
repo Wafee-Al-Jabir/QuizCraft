@@ -233,6 +233,37 @@ export async function publishQuiz(id: string, published: boolean): Promise<boole
 }
 
 // Get quiz statistics
+// Save live session participants to database
+export async function saveLiveSessionParticipants(
+  quizId: string,
+  participants: { id: string; name: string; score: number }[]
+): Promise<boolean> {
+  try {
+    const db = await getDatabase()
+
+    // Convert participants to QuizParticipant format
+    const quizParticipants: QuizParticipant[] = participants.map(p => ({
+      id: p.id,
+      name: p.name,
+      score: p.score,
+      answers: [], // Live sessions don't track individual answers in detail
+    }))
+
+    // Add participants to the quiz document
+    const result = await db
+      .collection<QuizDocument>("quizzes")
+      .updateOne(
+        { _id: new ObjectId(quizId) },
+        { $push: { participants: { $each: quizParticipants } } }
+      )
+
+    return result.matchedCount > 0
+  } catch (error) {
+    console.error("Error saving live session participants:", error)
+    return false
+  }
+}
+
 export async function getQuizStats(userId: string) {
   try {
     const db = await getDatabase()

@@ -43,7 +43,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
       correctAnswers: [0],
       type: "single-choice" as QuestionType,
       settings: {
-        points: 10,
+        points: 1000,
         showLeaderboardAfter: false,
       },
     },
@@ -57,7 +57,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
       correctAnswers: [0],
       type: "single-choice",
       settings: {
-        points: 10,
+        points: 1000,
         showLeaderboardAfter: false,
       },
     }
@@ -217,7 +217,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
   return (
     <>
       {/* Header */}
-      <header className="bg-black border-b border-gray-800">
+      <header className="bg-white dark:bg-background border-b border-gray-200 dark:border-border">
         <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
             <div className="flex items-center space-x-2 sm:space-x-4">
@@ -228,8 +228,8 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                 </Button>
               </Link>
               <div className="flex items-center space-x-2">
-                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                <h1 className="text-lg sm:text-xl font-bold text-white">Create New Quiz</h1>
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-gray-900 dark:text-white" />
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Create New Quiz</h1>
               </div>
             </div>
           </div>
@@ -281,7 +281,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
               </div>
 
               {showQuizSettings && (
-                <div className="mt-3 sm:mt-4 p-3 sm:p-4 border border-gray-700 rounded-md bg-gray-900">
+                <div className="mt-3 sm:mt-4 p-3 sm:p-4 border border-gray-700 dark:border-border rounded-md bg-gray-900 dark:bg-card">
                   <h3 className="text-sm font-medium mb-3 text-white">Quiz Settings</h3>
                   <div className="space-y-3 sm:space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
@@ -364,7 +364,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                   {/* Image Upload Section */}
                   <div className="space-y-2">
                     <Label className="text-sm sm:text-base">Question Image (Optional)</Label>
-                    <div className="border-2 border-dashed border-gray-700 rounded-lg p-4 bg-black">
+                    <div className="border-2 border-dashed border-gray-700 dark:border-border rounded-lg p-4 bg-black dark:bg-card">
                       {question.image ? (
                         <div className="space-y-2">
                           <img 
@@ -574,7 +574,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                   )}
 
                   {question.type === "open-ended" && (
-                    <div className="p-4 border border-gray-700 rounded-md bg-gray-900">
+                    <div className="p-4 border border-gray-700 dark:border-border rounded-md bg-gray-900 dark:bg-card">
                       <p className="text-sm text-gray-400">
                         Open-ended questions allow participants to enter free-form text responses. These responses will
                         be collected but not automatically scored.

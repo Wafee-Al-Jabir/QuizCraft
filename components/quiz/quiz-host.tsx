@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Users, Play, SkipForward, Trophy, Clock, CheckCircle, BarChart3, MessageSquare } from 'lucide-react'
 import { useSocket } from '@/lib/socket-context'
+import { saveLiveSessionParticipants } from '@/lib/quiz-actions'
 import type { Quiz } from '@/lib/types'
 
 interface QuizHostProps {
@@ -105,10 +106,20 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     })
 
     // Listen for quiz finished
-    socket.on('quiz-finished', (data) => {
+    socket.on('quiz-finished', async (data) => {
       setLeaderboard(data.leaderboard)
       setIsQuizFinished(true)
       setIsQuizActive(false)
+      
+      // Save participants to database for badge tracking
+      if (participants.length > 0) {
+        try {
+          await saveLiveSessionParticipants(quiz.id, participants)
+          console.log('Live session participants saved to database')
+        } catch (error) {
+          console.error('Failed to save live session participants:', error)
+        }
+      }
     })
 
     // Listen for poll responses

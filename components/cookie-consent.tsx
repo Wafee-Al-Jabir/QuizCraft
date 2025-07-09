@@ -7,8 +7,10 @@ import { X, Cookie } from "lucide-react"
 
 export function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     // Check if user has already made a choice
     const consent = localStorage.getItem('cookie-consent')
     if (!consent) {
@@ -30,7 +32,7 @@ export function CookieConsent() {
     setShowBanner(false)
   }
 
-  if (!showBanner) return null
+  if (!mounted || !showBanner) return null
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-md">

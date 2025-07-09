@@ -4,11 +4,14 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AnimatedCard, StaggeredContainer } from "@/components/ui/micro-interactions"
+import { motion } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { SimpleThemeToggle } from "@/components/ui/theme-toggle"
-import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle, UserPlus } from "lucide-react"
+import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle, UserPlus, Trophy } from "lucide-react"
 import { signOut } from "@/lib/auth-actions"
 import { getQuizzes, getQuizStats, publishQuiz, deleteQuiz } from "@/lib/quiz-actions"
+import { DashboardLoading } from "@/components/ui/loading"
 import type { User, Quiz } from "@/lib/types"
 
 interface QuizStats {
@@ -109,7 +112,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-background dark:to-background/95 transition-all duration-300">
       {/* Header */}
-      <header className="bg-black/80 dark:bg-card/80 backdrop-blur-md border-b border-gray-200 dark:border-border shadow-sm">
+      <header className="bg-white/80 dark:bg-card/80 backdrop-blur-md border-b border-gray-200 dark:border-border shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
@@ -117,79 +120,155 @@ export function DashboardContent({ user }: DashboardContentProps) {
             </div>
             <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">QuizCraft</h1>
           </div>
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center gap-4">
+            <Link href="/badges">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9"
+                    >
+                      <Trophy className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>View Badges</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </Link>
             <SimpleThemeToggle />
             <span className="hidden sm:block text-sm text-gray-600 dark:text-gray-300 font-medium">
               Welcome, {user.firstName} {user.lastName}
             </span>
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-150">
-              <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Sign Out</span>
-              <span className="sm:hidden">Out</span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleSignOut}
+                    className="h-9 w-9"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Sign Out</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+        <StaggeredContainer className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8" staggerDelay={0.1}>
+          <AnimatedCard hoverEffect="lift" className="bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-card/50 border-0 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Quizzes</CardTitle>
-              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+              <motion.div 
+                className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-md"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <FileText className="h-4 w-4 text-white" />
-              </div>
+              </motion.div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-400 dark:to-blue-500 bg-clip-text text-transparent">{stats.totalQuizzes}</div>
+              <motion.div 
+                className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-400 dark:to-blue-500 bg-clip-text text-transparent"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              >
+                {stats.totalQuizzes}
+              </motion.div>
               <p className="text-xs text-muted-foreground mt-1">{stats.publishedQuizzes} published</p>
             </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          </AnimatedCard>
+          <AnimatedCard hoverEffect="lift" className="bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-card/50 border-0 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Questions</CardTitle>
-              <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+              <motion.div 
+                className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-md"
+                whileHover={{ scale: 1.1, rotate: -5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <BarChart3 className="h-4 w-4 text-white" />
-              </div>
+              </motion.div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-700 dark:from-green-400 dark:to-green-500 bg-clip-text text-transparent">{stats.totalQuestions}</div>
+              <motion.div 
+                className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-700 dark:from-green-400 dark:to-green-500 bg-clip-text text-transparent"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
+              >
+                {stats.totalQuestions}
+              </motion.div>
               <p className="text-xs text-muted-foreground mt-1">Across all quizzes</p>
             </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          </AnimatedCard>
+          <AnimatedCard hoverEffect="lift" className="bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-card/50 border-0 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Participants</CardTitle>
-              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-md">
+              <motion.div 
+                className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 shadow-md"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <Users className="h-4 w-4 text-white" />
-              </div>
+              </motion.div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-500 bg-clip-text text-transparent">{stats.totalParticipants}</div>
+              <motion.div 
+                className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-500 bg-clip-text text-transparent"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+              >
+                {stats.totalParticipants}
+              </motion.div>
               <p className="text-xs text-muted-foreground mt-1">All-time participants</p>
             </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          </AnimatedCard>
+          <AnimatedCard hoverEffect="lift" className="bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-card/50 border-0 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Average Score</CardTitle>
-              <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-md">
+              <motion.div 
+                className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-md"
+                whileHover={{ scale: 1.1, rotate: -5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <TrendingUp className="h-4 w-4 text-white" />
-              </div>
+              </motion.div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 dark:from-orange-400 dark:to-orange-500 bg-clip-text text-transparent">{Math.round(stats.averageScore || 0)}</div>
+              <motion.div 
+                className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 dark:from-orange-400 dark:to-orange-500 bg-clip-text text-transparent"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
+              >
+                {Math.round(stats.averageScore || 0)}
+              </motion.div>
               <p className="text-xs text-muted-foreground mt-1">Points per participant</p>
             </CardContent>
-          </Card>
-        </div>
+          </AnimatedCard>
+        </StaggeredContainer>
+
+
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <h2 className="hidden sm:block text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">Your Quizzes</h2>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Link href="/quiz/join" className="w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-auto bg-gradient-to-r from-white to-gray-50 dark:from-card dark:to-card/80 border-2 border-gray-200 dark:border-border hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg transition-all duration-150 hover:scale-105">
+              <Button variant="outline" className="w-full sm:w-auto bg-gradient-to-r from-gray-50 to-white dark:from-card dark:to-card/80 border-2 border-gray-200 dark:border-border hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg transition-all duration-150 hover:scale-105">
                 <UserPlus className="h-4 w-4 mr-2 text-indigo-600 dark:text-indigo-400" />
                 <span className="hidden sm:inline font-medium">Join Quiz</span>
                 <span className="sm:hidden font-medium">Join</span>
@@ -207,7 +286,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
 
         {/* Quizzes List */}
         {isLoading ? (
-          <div className="text-center py-8">Loading your quizzes...</div>
+          <DashboardLoading />
         ) : quizzes.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">

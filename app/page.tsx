@@ -13,8 +13,10 @@ import type { User } from "@/lib/types"
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     async function checkAuth() {
       try {
         const currentUser = await getCurrentUser()
@@ -36,7 +38,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-background dark:via-background/95 dark:to-background/90 transition-all duration-300">
       {/* Header */}
-      <header className="border-b border-gray-200 dark:border-border bg-black/80 dark:bg-card/80 backdrop-blur-md shadow-sm">
+      <header className="border-b border-gray-200 dark:border-border bg-white/80 dark:bg-card/80 backdrop-blur-md shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
@@ -46,9 +48,9 @@ export default function HomePage() {
           </div>
           <div className="flex items-center space-x-2 sm:space-x-4">
             <SimpleThemeToggle />
-            {isLoading ? (
+            {!mounted || isLoading ? (
               <div className="animate-pulse">
-                <div className="h-9 w-20 bg-black rounded"></div>
+                <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
               </div>
             ) : user ? (
               <div className="flex items-center space-x-2 sm:space-x-4">
@@ -91,7 +93,7 @@ export default function HomePage() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 px-4 relative z-10">
-          {user ? (
+          {mounted && user ? (
             <>
               <Link href="/quiz/create" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-0">
@@ -99,7 +101,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/dashboard" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-black/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-white/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-300 hover:scale-105">
                   Host Quiz
                 </Button>
               </Link>
@@ -109,7 +111,7 @@ export default function HomePage() {
                 </Button>
               </Link>
             </>
-          ) : (
+          ) : mounted ? (
             <>
               <Link href="/auth/signup" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-0">
@@ -117,7 +119,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/quiz/join" className="w-full sm:w-auto">
-                 <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-black/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-150 hover:scale-105">
+                 <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-white/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-150 hover:scale-105">
                    Join Quiz
                  </Button>
                </Link>
@@ -127,6 +129,12 @@ export default function HomePage() {
                 </Button>
               </Link>
             </>
+          ) : (
+            <div className="animate-pulse flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="h-12 w-full sm:w-40 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-12 w-full sm:w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-12 w-full sm:w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </div>
           )}
         </div>
       </section>
@@ -135,7 +143,7 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-12 sm:py-16">
         <h3 className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent mb-8 sm:mb-12">Why Choose QuizCraft?</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          <Card className="text-center bg-gradient-to-br from-white to-gray-50 dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <Card className="text-center bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
             <CardHeader>
               <div className="p-3 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg mb-4 mx-auto w-fit">
                 <Zap className="h-10 w-10 sm:h-12 sm:w-12 text-white" />
@@ -144,7 +152,7 @@ export default function HomePage() {
               <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Create professional quizzes in minutes with our intuitive interface</CardDescription>
             </CardHeader>
           </Card>
-          <Card className="text-center bg-gradient-to-br from-white to-gray-50 dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <Card className="text-center bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
             <CardHeader>
               <div className="p-3 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg mb-4 mx-auto w-fit">
                 <Users className="h-10 w-10 sm:h-12 sm:w-12 text-white" />
@@ -153,7 +161,7 @@ export default function HomePage() {
               <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Share quizzes with your team or publish them for the world to see</CardDescription>
             </CardHeader>
           </Card>
-          <Card className="text-center sm:col-span-2 lg:col-span-1 bg-gradient-to-br from-white to-gray-50 dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <Card className="text-center sm:col-span-2 lg:col-span-1 bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-card/50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
             <CardHeader>
               <div className="p-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg mb-4 mx-auto w-fit">
                 <Trophy className="h-10 w-10 sm:h-12 sm:w-12 text-white" />

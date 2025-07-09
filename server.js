@@ -193,7 +193,10 @@ app.prepare().then(() => {
       } else if (currentQuestion.type === 'multiple-choice') {
         // For multiple choice, answer should be an array
         const answerArray = Array.isArray(answer) ? answer : [answer]
-        isCorrect = JSON.stringify(correctAnswers.sort()) === JSON.stringify(answerArray.sort())
+        // Check if all correct answers are selected and no incorrect ones
+        const allCorrectSelected = correctAnswers.every(idx => answerArray.includes(idx))
+        const noIncorrectSelected = answerArray.every(idx => correctAnswers.includes(idx))
+        isCorrect = allCorrectSelected && noIncorrectSelected && answerArray.length > 0
       }
       
       console.log('Is answer correct?', isCorrect)
@@ -202,8 +205,15 @@ app.prepare().then(() => {
         // Award points based on question settings and time bonus
         const basePoints = currentQuestion.settings?.points || 1000
         const timeLimit = currentQuestion.settings?.timeLimit || 30
-        const timeBonus = Math.max(0, (timeLimit - timeSpent) / timeLimit)
-        points = Math.round(basePoints + (timeBonus * basePoints * 0.5))
+        
+        // Calculate time bonus (same logic as client-side)
+        let timeBonus = 0
+        if (timeLimit && timeSpent < timeLimit) {
+          timeBonus = Math.floor((1 - timeSpent / timeLimit) * 5)
+        }
+        
+        points = basePoints + timeBonus
+        
         console.log('Points calculation:', {
           basePoints,
           timeLimit,

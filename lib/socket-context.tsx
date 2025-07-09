@@ -28,8 +28,10 @@ interface SocketProviderProps {
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     // Initialize socket connection
     const socketInstance = io(process.env.NODE_ENV === 'production' ? '' : window.location.origin, {
       transports: ['websocket', 'polling']
@@ -58,7 +60,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   }, [])
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected }}>
+    <SocketContext.Provider value={{ 
+      socket: mounted ? socket : null, 
+      isConnected: mounted ? isConnected : false 
+    }}>
       {children}
     </SocketContext.Provider>
   )

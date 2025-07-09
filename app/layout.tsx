@@ -3,6 +3,8 @@ import './globals.css'
 import { SocketProvider } from '@/lib/socket-context'
 import { CookieConsent } from '@/components/cookie-consent'
 import { ThemeProvider } from '@/components/theme-provider'
+import { AnimatedLayout } from '@/components/ui/animated-layout'
+import { Toaster } from '@/components/ui/sonner'
 
 export const metadata: Metadata = {
   title: 'QuizCraft',
@@ -16,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           rel="preload"
@@ -40,11 +42,15 @@ export default function RootLayout({
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange={false}
+          storageKey="quizcraft-theme"
         >
           <SocketProvider>
-            {children}
+            <AnimatedLayout>
+              {children}
+            </AnimatedLayout>
           </SocketProvider>
           <CookieConsent />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
