@@ -7,7 +7,7 @@
     "dev": "node server.js",
     "dev:next": "next dev",
     "lint": "next lint",
-    "start": "NODE_ENV=production node server.js"
+    "start": "set NODE_ENV=production && node server.js"
   },
   "dependencies": {
     "@aws-sdk/credential-providers": "latest",

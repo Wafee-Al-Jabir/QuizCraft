@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Celebration } from '@/components/ui/celebration'
+import { AchievementNotification, useAchievementNotification } from '@/components/ui/achievement-notification'
 import { Users, Clock, Trophy, AlertCircle } from 'lucide-react'
 import { useSocket } from '@/lib/socket-context'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -45,6 +46,7 @@ interface LeaderboardEntry {
 
 export function QuizParticipant({ onClose }: QuizParticipantProps) {
   const { socket, isConnected } = useSocket()
+  const { notification, showAchievement, hideAchievement } = useAchievementNotification()
   const [sessionCode, setSessionCode] = useState('')
   const [participantName, setParticipantName] = useState('')
   const [isJoining, setIsJoining] = useState(false)
@@ -118,6 +120,19 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
       setIsQuizFinished(true)
       setCurrentQuestion(null)
       setShowCelebration(true)
+      
+      // Check if user got first place and show achievement
+      if (data.leaderboard.length > 0 && data.leaderboard[0].name === participantName) {
+        setTimeout(() => {
+          showAchievement({
+            id: 'first-place',
+            name: 'First Place Champion!',
+            description: 'You finished in 1st place! Outstanding performance!',
+            type: 'special',
+            icon: '🥇'
+          })
+        }, 2000) // Show after celebration
+      }
     })
 
     // Listen for participant updates
@@ -163,14 +178,14 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
     }
   }, [socket, isConnected])
 
-  // Timer effect
+  // Timer effect - continues running even after answering
   useEffect(() => {
-    if (!currentQuestion || timeLeft <= 0 || isAnswered) return
+    if (!currentQuestion || timeLeft <= 0) return
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          // Auto-submit when time runs out
+          // Auto-submit when time runs out (only if not already answered)
           if (!isAnswered) {
             submitAnswer()
           }
@@ -181,7 +196,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [currentQuestion, timeLeft, isAnswered])
+  }, [currentQuestion, timeLeft])
 
   const joinQuiz = () => {
     if (!socket || !sessionCode.trim() || !participantName.trim()) return
@@ -245,6 +260,12 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
     })
     
     setHasPollResponded(true)
+  }
+
+  const handleGoToAchievements = () => {
+    // For now, just close the quiz and let parent handle navigation
+    // In a real app, this would navigate to achievements page
+    onClose()
   }
 
   if (!isConnected) {
@@ -412,8 +433,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                 <CardDescription className="text-sm sm:text-base">Score: {score} points</CardDescription>
               </div>
               <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4" />
-                <span className="font-mono text-xl sm:text-2xl text-white animate-pulse font-bold transition-all duration-300">
+                <Clock className="h-3 w-3" />
+                <span className="font-mono text-sm sm:text-base text-white animate-pulse font-bold transition-all duration-300">
                   {timeLeft}s
                 </span>
               </div>
@@ -608,6 +629,12 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
       <Celebration 
         show={showCelebration} 
         onComplete={() => setShowCelebration(false)} 
+      />
+      <AchievementNotification
+        show={notification.show}
+        achievement={notification.achievement}
+        onClose={hideAchievement}
+        onGoToAchievements={handleGoToAchievements}
       />
     </div>
   )
