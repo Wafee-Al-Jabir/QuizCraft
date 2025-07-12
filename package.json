@@ -2,8 +2,14 @@
   "name": "my-v0-project",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0",
+    "pnpm": ">=7.0.0"
+  },
   "scripts": {
     "build": "next build",
+    "build:deploy": "npm install && next build",
     "dev": "node server.js",
     "dev:next": "next dev",
     "lint": "next lint",
