@@ -95,6 +95,87 @@ const AVAILABLE_BADGES: Badge[] = [
     color: "from-pink-500 to-pink-600",
     type: "achievement",
     requirement: { type: "participant_count", value: 500 }
+  },
+  // First Place Badges
+  {
+    id: "first-victory",
+    name: "First Victory",
+    description: "Achieve 1st place in any quiz",
+    icon: "trophy",
+    rarity: "common",
+    color: "from-yellow-500 to-yellow-600",
+    type: "achievement",
+    requirement: { type: "first_place_count", value: 1 }
+  },
+  {
+    id: "podium-regular",
+    name: "Podium Regular",
+    description: "Finish 1st place 5 times",
+    icon: "award",
+    rarity: "rare",
+    color: "from-orange-500 to-orange-600",
+    type: "achievement",
+    requirement: { type: "first_place_count", value: 5 }
+  },
+  {
+    id: "champion",
+    name: "Champion",
+    description: "Achieve 1st place 10 times",
+    icon: "star",
+    rarity: "epic",
+    color: "from-purple-500 to-purple-600",
+    type: "achievement",
+    requirement: { type: "first_place_count", value: 10 }
+  },
+  {
+    id: "quiz-dominator",
+    name: "Quiz Dominator",
+    description: "Win 1st place 25 times",
+    icon: "trophy",
+    rarity: "legendary",
+    color: "from-red-500 to-red-600",
+    type: "achievement",
+    requirement: { type: "first_place_count", value: 25 }
+  },
+  {
+    id: "speed-champion",
+    name: "Speed Champion",
+    description: "Win 1st place with fastest time",
+    icon: "zap",
+    rarity: "epic",
+    color: "from-cyan-500 to-cyan-600",
+    type: "achievement",
+    requirement: { type: "speed_first_place", value: 1 }
+  },
+  {
+    id: "perfect-champion",
+    name: "Perfect Champion",
+    description: "Win 1st place with 100% accuracy",
+    icon: "target",
+    rarity: "epic",
+    color: "from-green-500 to-green-600",
+    type: "achievement",
+    requirement: { type: "perfect_first_place", value: 1 }
+  },
+  {
+    id: "streak-master",
+    name: "Streak Master",
+    description: "Win 1st place 3 times in a row",
+    icon: "star",
+    rarity: "rare",
+    color: "from-indigo-500 to-indigo-600",
+    type: "achievement",
+    requirement: { type: "first_place_streak", value: 3 }
+  },
+  {
+    id: "ultimate-champion",
+    name: "Ultimate Champion",
+    description: "Win 1st place 50 times",
+    icon: "award",
+    rarity: "legendary",
+    color: "from-gradient-to-r from-yellow-400 via-red-500 to-pink-500",
+    type: "achievement",
+    requirement: { type: "first_place_count", value: 50 }
   }
 ]
 
@@ -149,6 +230,18 @@ function calculateProgress(badge: Badge, stats: any) {
       break
     case "exploration":
       progress = stats.categoriesExplored || 0
+      break
+    case "first_place_count":
+      progress = stats.firstPlaceWins || 0
+      break
+    case "speed_first_place":
+      progress = stats.speedFirstPlace || 0
+      break
+    case "perfect_first_place":
+      progress = stats.perfectFirstPlace || 0
+      break
+    case "first_place_streak":
+      progress = stats.firstPlaceStreak || 0
       break
     default:
       progress = 0

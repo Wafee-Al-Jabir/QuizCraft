@@ -84,32 +84,76 @@ export function Loading({
   )
 }
 
-// Page-level loading component
+// Page-level loading component with enhanced performance
 export function PageLoading({ text = "Loading page..." }: { text?: string }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-black flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-black flex items-center justify-center">
       <motion.div 
-        className="text-center space-y-4"
-        initial={{ opacity: 0, scale: 0.8 }}
+        className="text-center space-y-6 max-w-md mx-auto px-6"
+        initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        <LoadingSpinner size="lg" className="mx-auto text-purple-500" />
-        <motion.h2 
-          className="text-xl font-semibold text-gray-900 dark:text-white"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        {/* Enhanced spinner with gradient */}
+        <motion.div
+          className="relative mx-auto w-16 h-16"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
         >
-          {text}
-        </motion.h2>
-        <motion.p 
-          className="text-gray-600 dark:text-gray-400"
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-20 animate-pulse" />
+          <LoadingSpinner size="lg" className="relative z-10 border-indigo-500 border-t-purple-500" />
+        </motion.div>
+        
+        {/* Brand logo/text */}
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, ease: "easeOut" }}
+        >
+          <h1 className="text-2xl font-bold font-zen-dots bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+            QuizCraft
+          </h1>
+          <p className="text-sm font-zen-dots text-gray-600 dark:text-gray-300 mb-2">
+            Test your IQ with us
+          </p>
+          <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300">
+            {text}
+          </h2>
+        </motion.div>
+        
+        {/* Animated progress dots */}
+        <motion.div
+          className="flex justify-center space-x-1"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          Please wait while we prepare everything for you
+          {[0, 1, 2].map((index) => (
+            <motion.div
+              key={index}
+              className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                delay: index * 0.2,
+                ease: "easeInOut"
+              }}
+            />
+          ))}
+        </motion.div>
+        
+        <motion.p 
+          className="text-sm text-gray-500 dark:text-gray-400"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          Preparing your quiz experience...
         </motion.p>
       </motion.div>
     </div>

@@ -6,8 +6,10 @@ import { Badge as BadgeUI } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Trophy, Star, Zap, Users, Target, Rocket, Globe, Award, ArrowRight } from "lucide-react"
+import { Trophy, Star, Zap, Users, Target, Rocket, Globe, Award, Flame, ArrowRight, Crown } from "lucide-react"
 import { useBadgeNotifications } from "@/components/ui/badge-notification"
+import { StreakCounter } from "@/components/ui/streak-counter"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 import type { Badge, UserBadge, User } from "@/lib/types"
 
@@ -19,11 +21,76 @@ interface BadgesSectionProps {
     totalQuestions: number
     totalParticipants: number
     averageScore: number
+    currentStreak?: number
+    longestStreak?: number
   }
+  className?: string
+  currentStreak?: number
+  longestStreak?: number
 }
 
-// Predefined badges with their requirements
+// Predefined streak-based badges with their requirements
 const AVAILABLE_BADGES: Badge[] = [
+  {
+    id: "first_streak",
+    type: "streak",
+    name: "Getting Started",
+    description: "Start your first streak",
+    icon: "Flame",
+    color: "from-orange-400 to-red-500",
+    requirement: { type: "streak", value: 1 },
+    rarity: "common"
+  },
+  {
+    id: "streak_3",
+    type: "streak",
+    name: "On Fire",
+    description: "Maintain a 3-day streak",
+    icon: "Flame",
+    color: "from-orange-500 to-red-600",
+    requirement: { type: "streak", value: 3 },
+    rarity: "common"
+  },
+  {
+    id: "streak_7",
+    type: "streak",
+    name: "Streak Warrior",
+    description: "Maintain a 7-day streak",
+    icon: "Flame",
+    color: "from-red-500 to-red-600",
+    requirement: { type: "streak", value: 7 },
+    rarity: "rare"
+  },
+  {
+    id: "streak_15",
+    type: "streak",
+    name: "Dedication Master",
+    description: "Maintain a 15-day streak",
+    icon: "Star",
+    color: "from-purple-500 to-purple-600",
+    requirement: { type: "streak", value: 15 },
+    rarity: "rare"
+  },
+  {
+    id: "streak_30",
+    type: "streak",
+    name: "Unstoppable Force",
+    description: "Maintain a 30-day streak",
+    icon: "Trophy",
+    color: "from-yellow-500 to-yellow-600",
+    requirement: { type: "streak", value: 30 },
+    rarity: "epic"
+  },
+  {
+    id: "streak_100",
+    type: "streak",
+    name: "Legendary Streaker",
+    description: "Maintain a 100-day streak",
+    icon: "Award",
+    color: "from-yellow-400 to-yellow-500",
+    requirement: { type: "streak", value: 100 },
+    rarity: "legendary"
+  },
   {
     id: "first_quiz",
     type: "quiz_creator",
@@ -45,64 +112,14 @@ const AVAILABLE_BADGES: Badge[] = [
     rarity: "rare"
   },
   {
-    id: "quiz_legend",
-    type: "quiz_master",
-    name: "Quiz Legend",
-    description: "Create 50 quizzes",
-    icon: "Star",
-    color: "from-yellow-500 to-yellow-600",
-    requirement: { type: "quiz_count", value: 50 },
-    rarity: "legendary"
-  },
-  {
-    id: "crowd_pleaser",
-    type: "social_butterfly",
-    name: "Crowd Pleaser",
-    description: "Reach 100 total participants",
-    icon: "Users",
-    color: "from-green-500 to-green-600",
-    requirement: { type: "participant_count", value: 100 },
-    rarity: "rare"
-  },
-  {
-    id: "viral_creator",
-    type: "social_butterfly",
-    name: "Viral Creator",
-    description: "Reach 1000 total participants",
-    icon: "Rocket",
-    color: "from-red-500 to-red-600",
-    requirement: { type: "participant_count", value: 1000 },
-    rarity: "legendary"
-  },
-  {
-    id: "explorer",
-    type: "explorer",
-    name: "Explorer",
-    description: "Create quizzes with all question types",
-    icon: "Globe",
-    color: "from-indigo-500 to-indigo-600",
-    requirement: { type: "exploration", value: 5 },
-    rarity: "epic"
-  },
-  {
     id: "perfectionist",
     type: "perfectionist",
     name: "Perfectionist",
-    description: "Create a quiz with perfect average score",
+    description: "Achieve 100% average score",
     icon: "Target",
     color: "from-pink-500 to-pink-600",
     requirement: { type: "perfect_score", value: 100 },
     rarity: "epic"
-  },
-  {
-    id: "speed_demon",
-    type: "speed_demon",
-    name: "Speed Demon",
-    description: "Create 5 quizzes in one day",
-    icon: "Zap",
-    color: "from-orange-500 to-orange-600",
-    requirement: { type: "speed", value: 5 },
-    rarity: "rare"
   }
 ]
 
@@ -115,7 +132,8 @@ const getIconComponent = (iconName: string) => {
     Target,
     Rocket,
     Globe,
-    Award
+    Award,
+    Flame
   }
   return icons[iconName as keyof typeof icons] || Trophy
 }
@@ -134,46 +152,68 @@ const calculateProgress = (badge: Badge, stats: any): { progress: number; maxPro
   let progress = 0
   let maxProgress = badge.requirement.value
   
+  // Ensure stats has default values
+  const safeStats = {
+    totalQuizzes: stats?.totalQuizzes || 0,
+    totalParticipants: stats?.totalParticipants || 0,
+    averageScore: stats?.averageScore || 0,
+    totalQuestions: stats?.totalQuestions || 0,
+    currentStreak: stats?.currentStreak || 0,
+    longestStreak: stats?.longestStreak || 0,
+    questionTypesUsed: stats?.questionTypesUsed || [],
+    quizzesToday: stats?.quizzesToday || 0,
+    ...stats
+  }
+  
   switch (badge.requirement.type) {
     case "quiz_count":
-      progress = stats.totalQuizzes
-      // Debug for Quiz Creator badge
-      if (badge.id === 'first_quiz') {
-        console.log('Quiz Creator Badge Debug:', {
-          badgeId: badge.id,
-          totalQuizzes: stats.totalQuizzes,
-          progress,
-          maxProgress,
-          willUnlock: progress >= maxProgress
-        })
-      }
+      progress = safeStats.totalQuizzes
       break
     case "participant_count":
-      progress = stats.totalParticipants
+      progress = safeStats.totalParticipants
       break
     case "perfect_score":
-      progress = Math.round(stats.averageScore || 0)
+      progress = Math.round(safeStats.averageScore)
       break
     case "exploration":
-      // This would need more complex logic to track question types used
-      progress = Math.min(stats.totalQuizzes, maxProgress)
+      // Track unique question types used (assuming we have this data)
+      progress = safeStats.questionTypesUsed?.length || Math.min(safeStats.totalQuizzes, maxProgress)
       break
     case "speed":
-      // This would need date tracking - for now, just use total quizzes
-      progress = Math.min(stats.totalQuizzes, maxProgress)
+      // Track quizzes created today or in a short timeframe
+      progress = safeStats.quizzesToday || Math.min(safeStats.totalQuizzes, maxProgress)
+      break
+    case "question_count":
+      progress = safeStats.totalQuestions
+      break
+    case "streak":
+      progress = Math.max(safeStats.currentStreak || 0, safeStats.longestStreak || 0)
       break
     default:
       progress = 0
   }
   
-  return {
-    progress: Math.min(progress, maxProgress),
+  const finalProgress = Math.min(progress, maxProgress)
+  const isUnlocked = finalProgress >= maxProgress
+  
+  // Debug logging for badge progress
+  console.log(`Badge ${badge.id} progress:`, {
+    badgeId: badge.id,
+    requirementType: badge.requirement.type,
+    progress: finalProgress,
     maxProgress,
-    isUnlocked: progress >= maxProgress
+    isUnlocked,
+    stats: safeStats
+  })
+  
+  return {
+    progress: finalProgress,
+    maxProgress,
+    isUnlocked
   }
 }
 
-export function BadgesSection({ user, stats }: BadgesSectionProps) {
+export function BadgesSection({ user, stats, className, currentStreak = 0, longestStreak = 0 }: BadgesSectionProps) {
   const [userBadges, setUserBadges] = useState<UserBadge[]>([])
   const [previousStats, setPreviousStats] = useState<any>(null)
   const { checkForNewBadges } = useBadgeNotifications()
@@ -182,12 +222,60 @@ export function BadgesSection({ user, stats }: BadgesSectionProps) {
   // Debug: Log stats to see what we're working with
   console.log('Badge Section Stats:', stats)
   
+  // Ensure stats has default values
+    const safeStats = {
+      totalQuizzes: stats?.totalQuizzes || 0,
+      publishedQuizzes: stats?.publishedQuizzes || 0,
+      totalParticipants: stats?.totalParticipants || 0,
+      averageScore: stats?.averageScore || 0,
+      totalQuestions: stats?.totalQuestions || 0,
+      currentStreak: stats?.currentStreak || currentStreak || 0,
+      longestStreak: stats?.longestStreak || longestStreak || 0,
+      questionTypesUsed: ['multiple-choice', 'true-false', 'short-answer'], // Default question types
+      quizzesToday: 0, // Default value
+      perfectScores: 0 // Default value
+    }
+  
   // Calculate badge progress for all available badges
   const badgeProgress = AVAILABLE_BADGES.map(badge => {
-    const progress = calculateProgress(badge, stats)
+    let progress = 0
+    const requirement = badge.requirement
+    
+    switch (requirement.type) {
+      case "quiz_count":
+        progress = safeStats.totalQuizzes
+        break
+      case "question_count":
+        progress = safeStats.totalQuestions
+        break
+      case "participant_count":
+        progress = safeStats.totalParticipants
+        break
+      case "perfect_score":
+        progress = safeStats.perfectScores
+        break
+      case "speed":
+        progress = safeStats.quizzesToday
+        break
+      case "exploration":
+        progress = safeStats.questionTypesUsed.length
+        break
+      case "streak":
+        progress = Math.max(safeStats.currentStreak, safeStats.longestStreak)
+        break
+      default:
+        progress = 0
+    }
+    
+    const isUnlocked = progress >= requirement.value
+    const progressPercentage = Math.min((progress / requirement.value) * 100, 100)
+    
     return {
       ...badge,
-      ...progress
+      progress,
+      maxProgress: requirement.value,
+      isUnlocked,
+      progressPercentage
     }
   })
   
@@ -214,7 +302,36 @@ export function BadgesSection({ user, stats }: BadgesSectionProps) {
   }, [stats, previousStats, checkForNewBadges])
 
   return (
-    <div className="space-y-6">
+    <div className={cn('space-y-6', className)}>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Streaks & Achievements
+        </h2>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {unlockedBadges.length} / {AVAILABLE_BADGES.length} unlocked
+        </div>
+      </div>
+      
+      {/* Streak Counter Section */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+          🔥 Your Learning Streak
+        </h3>
+        <div className="flex items-center justify-center">
+          <StreakCounter 
+            streak={currentStreak || safeStats.currentStreak || 0}
+            maxStreak={longestStreak || safeStats.longestStreak || 0}
+            size="lg"
+            onStreakMilestone={(milestone) => {
+              // Handle milestone achievements
+              console.log(`Milestone reached: ${milestone}`)
+            }}
+          />
+        </div>
+        <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+          Keep learning daily to maintain your streak!
+        </div>
+      </div>
       {/* Badges Overview */}
       <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-gray-200 dark:border-gray-700 shadow-lg">
         <CardHeader>
@@ -274,27 +391,26 @@ export function BadgesSection({ user, stats }: BadgesSectionProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {AVAILABLE_BADGES.slice(0, 6).map((badge) => {
+            {badgeProgress.slice(0, 6).map((badge) => {
               const IconComponent = getIconComponent(badge.icon)
-              const progress = calculateProgress(badge, stats)
               return (
                 <TooltipProvider key={badge.id}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="relative p-3 rounded-lg border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:shadow-md hover:shadow-gray-300/50 dark:hover:shadow-gray-700/50 transition-all duration-200 cursor-pointer">
-                        {progress.isUnlocked && (
+                        {badge.isUnlocked && (
                           <div className="absolute -top-1 -right-1 z-10">
                             <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
                           </div>
                         )}
-                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${badge.color} flex items-center justify-center mx-auto mb-2 ${progress.isUnlocked ? 'shadow-lg shadow-yellow-500/30' : 'opacity-60'}`}>
+                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${badge.color} flex items-center justify-center mx-auto mb-2 ${badge.isUnlocked ? 'shadow-lg shadow-yellow-500/30' : 'opacity-60'}`}>
                           <IconComponent className="h-5 w-5 text-white" />
                         </div>
                         <div className="text-center">
                           <div className="font-semibold text-xs truncate text-gray-900 dark:text-white">{badge.name}</div>
-                          {!progress.isUnlocked && (
+                          {!badge.isUnlocked && (
                             <div className="mt-1">
-                              <Progress value={(progress.progress / progress.maxProgress) * 100} className="h-1" />
+                              <Progress value={badge.progressPercentage} className="h-1" />
                             </div>
                           )}
                         </div>
@@ -304,14 +420,14 @@ export function BadgesSection({ user, stats }: BadgesSectionProps) {
                       <div className="text-center">
                         <div className="font-semibold text-gray-900 dark:text-white">{badge.name}</div>
                         <div className="text-sm text-gray-600 dark:text-gray-300">{badge.description}</div>
-                        {progress.isUnlocked ? (
+                        {badge.isUnlocked ? (
                           <div className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center justify-center gap-1">
                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                             Completed!
                           </div>
                         ) : (
                           <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                            {progress.progress}/{progress.maxProgress} ({Math.round((progress.progress / progress.maxProgress) * 100)}%)
+                            {badge.progress}/{badge.maxProgress} ({Math.round(badge.progressPercentage)}%)
                           </div>
                         )}
                       </div>

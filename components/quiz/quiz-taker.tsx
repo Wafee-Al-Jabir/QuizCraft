@@ -198,20 +198,28 @@ export function QuizTaker({ quiz, participant }: QuizTakerProps) {
     quizQuestions.forEach((question, index) => {
       if (question.type !== "open-ended" && question.type !== "poll") {
         const selectedOptions = answers[index] || []
+        let isCorrect = false
 
         if (question.type === "single-choice" || question.type === "true-false") {
-          if (selectedOptions.length === 1 && question.correctAnswers.includes(selectedOptions[0])) {
-            correct++
-            totalPoints += question.settings.points
-          }
+          isCorrect = selectedOptions.length === 1 && question.correctAnswers.includes(selectedOptions[0])
         } else if (question.type === "multiple-choice") {
           const allCorrectSelected = question.correctAnswers.every((idx) => selectedOptions.includes(idx))
           const noIncorrectSelected = selectedOptions.every((idx) => question.correctAnswers.includes(idx))
+          isCorrect = allCorrectSelected && noIncorrectSelected && selectedOptions.length > 0
+        }
 
-          if (allCorrectSelected && noIncorrectSelected && selectedOptions.length > 0) {
-            correct++
-            totalPoints += question.settings.points
+        if (isCorrect) {
+          correct++
+          let questionPoints = question.settings.points
+          
+          // Add time bonus if answer was fast (simulate average fast time for final calculation)
+          if (question.settings.timeLimit) {
+            const estimatedFastTime = question.settings.timeLimit * 0.5 // Assume 50% of time limit for bonus calculation
+            const timeBonus = Math.floor((1 - estimatedFastTime / question.settings.timeLimit) * 5)
+            questionPoints += timeBonus
           }
+          
+          totalPoints += questionPoints
         }
       }
     })

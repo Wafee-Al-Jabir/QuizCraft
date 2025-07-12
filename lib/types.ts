@@ -7,6 +7,12 @@ export interface User {
   email: string
   password: string
   createdAt: string
+  streakData?: {
+    currentStreak: number
+    longestStreak: number
+    lastActivityDate: string
+    streakType: 'quiz_creation' | 'quiz_participation' | 'daily_login'
+  }
 }
 
 export type QuestionType = "single-choice" | "multiple-choice" | "true-false" | "open-ended" | "poll"
@@ -99,7 +105,7 @@ export interface QuizParticipantDocument extends Omit<QuizParticipant, "id"> {
 }
 
 // Badge System
-export type BadgeType = "quiz_creator" | "quiz_master" | "participant" | "streak" | "perfectionist" | "speed_demon" | "social_butterfly" | "explorer" | "achievement"
+export type BadgeType = "quiz_creator" | "quiz_master" | "participant" | "streak" | "perfectionist" | "speed_demon" | "social_butterfly" | "explorer" | "achievement" | "special"
 
 export interface Badge {
   id: string

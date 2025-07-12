@@ -9,11 +9,15 @@ import { BookOpen, Users, Trophy, Zap, LogOut } from "lucide-react"
 import { getCurrentUser } from "@/lib/auth"
 import { signOut } from "@/lib/auth-actions"
 import type { User } from "@/lib/types"
+import { LoadingAnimation } from "@/components/ui/loading-animation"
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [hostLoading, setHostLoading] = useState(false)
+  const [showLoadingAnimation, setShowLoadingAnimation] = useState(true)
+  const [contentReady, setContentReady] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -24,10 +28,18 @@ export default function HomePage() {
       } catch (error) {
         console.error("Auth check failed:", error)
       } finally {
-        setIsLoading(false)
+        // Faster loading - reduce delay
+        setTimeout(() => setIsLoading(false), 100)
       }
     }
     checkAuth()
+    
+    // Hide loading animation after exactly 4 seconds (3.5s loading bar + 0.5s exit animation)
+    const timer = setTimeout(() => {
+      setShowLoadingAnimation(false)
+    }, 4000)
+    
+    return () => clearTimeout(timer)
   }, [])
 
   const handleSignOut = async () => {
@@ -35,22 +47,41 @@ export default function HomePage() {
     setUser(null)
     window.location.reload()
   }
+
+  const handleHostQuiz = () => {
+    setHostLoading(true)
+    // Simulate connection establishment
+    setTimeout(() => {
+      window.location.href = '/dashboard'
+    }, 1500)
+  }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-background dark:via-background/95 dark:to-background/90 transition-all duration-300">
+    <>
+      <LoadingAnimation 
+        isVisible={showLoadingAnimation} 
+        onComplete={() => setContentReady(true)}
+      />
+      
+      {!showLoadingAnimation && (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-background dark:via-background/95 dark:to-background/90 transition-all duration-300">
       {/* Header */}
       <header className="border-b border-gray-200 dark:border-border bg-white/80 dark:bg-card/80 backdrop-blur-md shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200">
             <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
               <BookOpen className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">QuizCraft</h1>
-          </div>
+            <div className="flex flex-col">
+              <h1 className="text-xl sm:text-2xl font-bold font-zen-dots bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent leading-tight">QuizCraft</h1>
+              <p className="text-xs sm:text-sm font-zen-dots text-gray-500 dark:text-gray-400 -mt-1">Test your IQ with us</p>
+            </div>
+          </Link>
+
           <div className="flex items-center space-x-2 sm:space-x-4">
             <SimpleThemeToggle />
             {!mounted || isLoading ? (
               <div className="animate-pulse">
-                <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-9 w-20 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-lg animate-shimmer"></div>
               </div>
             ) : user ? (
               <div className="flex items-center space-x-2 sm:space-x-4">
@@ -100,11 +131,22 @@ export default function HomePage() {
                   Create New Quiz
                 </Button>
               </Link>
-              <Link href="/dashboard" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-white/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-300 hover:scale-105">
-                  Host Quiz
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={handleHostQuiz}
+                disabled={hostLoading}
+                className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-white/80 dark:bg-card/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-300 dark:hover:border-indigo-400 hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {hostLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-indigo-600 border-t-transparent"></div>
+                    <span>Please wait while we establish connection...</span>
+                  </div>
+                ) : (
+                  'Host Quiz'
+                )}
+              </Button>
               <Link href="/quiz/join" className="w-full sm:w-auto">
                 <Button variant="secondary" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
                   Join Quiz
@@ -131,9 +173,9 @@ export default function HomePage() {
             </>
           ) : (
             <div className="animate-pulse flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <div className="h-12 w-full sm:w-40 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              <div className="h-12 w-full sm:w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              <div className="h-12 w-full sm:w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-12 w-full sm:w-40 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-lg animate-shimmer"></div>
+              <div className="h-12 w-full sm:w-32 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-lg animate-shimmer"></div>
+              <div className="h-12 w-full sm:w-32 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-lg animate-shimmer"></div>
             </div>
           )}
         </div>
@@ -176,15 +218,20 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-background dark:via-background/95 dark:to-background text-white dark:text-gray-300 py-12 border-t border-gray-700 dark:border-border">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
+          <Link href="/" className="flex items-center justify-center space-x-2 mb-4 hover:opacity-80 transition-opacity duration-200">
             <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
               <BookOpen className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">QuizCraft</span>
-          </div>
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold font-zen-dots bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent leading-tight">QuizCraft</span>
+              <p className="text-xs font-zen-dots text-gray-400 dark:text-gray-500 -mt-1">Test your IQ with us</p>
+            </div>
+          </Link>
           <p className="text-gray-400 dark:text-gray-500">© 2025 QuizCraft. Built with Next.js by Wafee Al-Jabir.</p>
         </div>
       </footer>
-    </div>
+        </div>
+      )}
+    </>
   )
 }

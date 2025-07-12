@@ -36,10 +36,13 @@ export function SignUpForm() {
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader className="text-center">
-        <div className="flex items-center justify-center space-x-2 mb-2">
+        <Link href="/" className="flex items-center justify-center space-x-2 mb-2 hover:opacity-80 transition-opacity duration-200">
           <BookOpen className="h-6 w-6 text-indigo-600" />
-          <span className="text-xl font-bold">QuizCraft</span>
-        </div>
+          <div className="flex flex-col items-center">
+            <span className="text-xl font-bold font-zen-dots">QuizCraft</span>
+            <p className="text-xs font-zen-dots text-gray-500 -mt-1">Test your IQ with us</p>
+          </div>
+        </Link>
         <CardTitle className="text-2xl">Create Account</CardTitle>
         <CardDescription>Enter your information to create your QuizCraft account</CardDescription>
       </CardHeader>

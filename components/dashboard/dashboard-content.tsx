@@ -114,12 +114,15 @@ export function DashboardContent({ user }: DashboardContentProps) {
       {/* Header */}
       <header className="bg-white/80 dark:bg-card/80 backdrop-blur-md border-b border-gray-200 dark:border-border shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200">
             <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
               <BookOpen className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">QuizCraft</h1>
-          </div>
+            <div className="flex flex-col">
+              <h1 className="text-xl sm:text-2xl font-bold font-zen-dots bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent leading-tight">QuizCraft</h1>
+              <p className="text-xs sm:text-sm font-zen-dots text-gray-500 dark:text-gray-400 -mt-1">Test your IQ with us</p>
+            </div>
+          </Link>
           <div className="flex items-center gap-4">
             <Link href="/badges">
               <TooltipProvider>
