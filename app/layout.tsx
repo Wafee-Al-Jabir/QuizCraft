@@ -1,15 +1,11 @@
-import type { Metadata } from 'next'
-import './globals.css'
-import { SocketProvider } from '@/lib/socket-context'
-import { CookieConsent } from '@/components/cookie-consent'
-import { ThemeProvider } from '@/components/theme-provider'
-import { AnimatedLayout } from '@/components/ui/animated-layout'
-import { Toaster } from '@/components/ui/sonner'
+import type React from "react"
+import type { Metadata } from "next"
+import "./globals.css"
 
 export const metadata: Metadata = {
-  title: 'QuizCraft',
-  description: 'Created with Claude 4 Sonnet & v0.dev',
-  generator: 'Wafee Al-Jabir, Claude 4 Sonnet, v0.dev',
+  title: "QuizCraft",
+  description: "Created with Claude 4 Sonnet & v0.dev",
+  generator: "Wafee Al-Jabir, Claude 4 Sonnet, v0.dev",
 }
 
 export default function RootLayout({
@@ -18,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <head>
         <link
           rel="preload"
@@ -36,25 +32,7 @@ export default function RootLayout({
           />
         </noscript>
       </head>
-      <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange={false}
-          storageKey="quizcraft-theme"
-        >
-          <>
-            <SocketProvider>
-              <AnimatedLayout>
-                {children}
-              </AnimatedLayout>
-            </SocketProvider>
-            <CookieConsent />
-            <Toaster />
-          </>
-        </ThemeProvider>
-      </body>
+      <body className="font-[Poppins] bg-background text-foreground">{children}</body>
     </html>
   )
 }

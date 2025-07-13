@@ -8,13 +8,14 @@
     "pnpm": ">=7.0.0"
   },
   "scripts": {
-    "build": "npx next build",
-    "build:deploy": "npx next build",
+    "build": "pnpm exec next build",
+    "build:win": "build.bat",
+    "build:deploy": "pnpm exec next build",
     "build:test": "node scripts/test-build.js",
     "dev": "node server.js",
-    "dev:next": "npx next dev",
-    "lint": "npx next lint",
-    "start": "set NODE_ENV=production node server.js"
+    "dev:next": "pnpm exec next dev",
+    "lint": "pnpm exec next lint",
+    "start": "set NODE_ENV=production && node server.js"
   },
   "dependencies": {
     "@aws-sdk/credential-providers": "latest",
@@ -65,7 +66,7 @@
     "mongodb-client-encryption": "latest",
     "next": "^14.2.30",
     "next-themes": "^0.4.4",
-    "npx": "^10.2.2",
+    "npx": "^3.0.0",
     "react": "^18",
     "react-day-picker": "8.10.1",
     "react-dom": "^18",
