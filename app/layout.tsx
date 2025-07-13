@@ -44,13 +44,15 @@ export default function RootLayout({
           disableTransitionOnChange={false}
           storageKey="quizcraft-theme"
         >
-          <SocketProvider>
-            <AnimatedLayout>
-              {children}
-            </AnimatedLayout>
-          </SocketProvider>
-          <CookieConsent />
-          <Toaster />
+          <>
+            <SocketProvider>
+              <AnimatedLayout>
+                {children}
+              </AnimatedLayout>
+            </SocketProvider>
+            <CookieConsent />
+            <Toaster />
+          </>
         </ThemeProvider>
       </body>
     </html>

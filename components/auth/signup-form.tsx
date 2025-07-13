@@ -47,7 +47,7 @@ export function SignUpForm() {
         <CardDescription>Enter your information to create your QuizCraft account</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={onSubmit} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); onSubmit(new FormData(e.currentTarget)); }} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First name</Label>

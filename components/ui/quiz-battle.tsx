@@ -9,7 +9,7 @@ import {
   Clock, 
   Users, 
   Crown, 
-  Fire, 
+  Flame, 
   Target,
   Heart,
   Star,
@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Input } from '@/components/ui/input'
 import { useSoundEffects } from './sound-effects'
 import { Celebration } from './celebration'
 
@@ -159,7 +160,7 @@ export function PlayerCard({
               
               {player.streak > 0 && (
                 <span className="flex items-center space-x-1 text-orange-500">
-                  <Fire className="w-4 h-4" />
+                  <Flame className="w-4 h-4" />
                   <span>{player.streak}</span>
                 </span>
               )}
@@ -575,7 +576,7 @@ export function BattleArena({
       {/* Celebration effect */}
       <AnimatePresence>
         {showCelebration && (
-          <Celebration />
+          <Celebration show={showCelebration} />
         )}
       </AnimatePresence>
     </>

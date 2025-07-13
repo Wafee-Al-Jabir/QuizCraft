@@ -275,7 +275,7 @@ export function LevelUpModal({ show, level }: { show: boolean; level: number }) 
               </CardContent>
             </Card>
             
-            <Celebration active={true} />
+            <Celebration show={true} />
           </motion.div>
         </motion.div>
       )}

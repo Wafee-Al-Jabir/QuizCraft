@@ -34,7 +34,7 @@ export interface PowerUp {
   type: PowerUpType
   name: string
   description: string
-  icon: React.ComponentType<{ size?: number; className?: string }>
+  icon: React.ComponentType<any>
   color: string
   rarity: 'common' | 'rare' | 'epic' | 'legendary'
   cooldown?: number // in seconds

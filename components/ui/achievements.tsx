@@ -9,15 +9,14 @@ import {
   Zap, 
   Clock, 
   Brain, 
-  Fire, 
+  Flame, 
   Crown, 
   Shield, 
   Gem,
   Award,
   Medal,
   CheckCircle,
-  Lock,
-  Progress
+  Lock
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -30,7 +29,7 @@ export interface Achievement {
   id: string
   title: string
   description: string
-  icon: React.ComponentType<{ size?: number; className?: string }>
+  icon: React.ComponentType<any>
   category: 'quiz' | 'streak' | 'speed' | 'accuracy' | 'social' | 'special'
   rarity: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'
   points: number
@@ -127,7 +126,7 @@ const ACHIEVEMENT_DATA: Omit<Achievement, 'id' | 'unlocked' | 'unlockedAt'>[] = 
   {
     title: 'On Fire',
     description: 'Get a 10 question streak',
-    icon: Fire,
+    icon: Flame,
     category: 'streak',
     rarity: 'bronze',
     points: 20,
@@ -394,7 +393,7 @@ export function AchievementCard({
       {/* Celebration effect */}
       <AnimatePresence>
         {showCelebration && (
-          <Celebration />
+          <Celebration show={showCelebration} />
         )}
       </AnimatePresence>
     </>
@@ -470,7 +469,7 @@ export function AchievementGallery({
         
         <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-4 text-white">
           <div className="flex items-center space-x-2">
-            <Progress className="w-5 h-5" />
+            <CheckCircle className="w-5 h-5" />
             <span className="font-medium">Completion</span>
           </div>
           <div className="text-2xl font-bold mt-1">
@@ -483,7 +482,8 @@ export function AchievementGallery({
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center space-x-2">
           <span className="text-sm font-medium">Filter:</span>
-          <select 
+          <select
+            aria-label="Filter achievements"
             value={selectedFilter} 
             onChange={(e) => setSelectedFilter(e.target.value as any)}
             className="px-3 py-1 border rounded-md text-sm"
@@ -502,7 +502,8 @@ export function AchievementGallery({
         
         <div className="flex items-center space-x-2">
           <span className="text-sm font-medium">Sort by:</span>
-          <select 
+          <select
+            aria-label="Sort achievements"
             value={selectedSort} 
             onChange={(e) => setSelectedSort(e.target.value as any)}
             className="px-3 py-1 border rounded-md text-sm"

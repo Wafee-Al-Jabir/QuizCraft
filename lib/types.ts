@@ -115,7 +115,7 @@ export interface Badge {
   icon: string
   color: string
   requirement: {
-    type: "quiz_count" | "question_count" | "participant_count" | "perfect_score" | "speed" | "streak" | "exploration"
+    type: "quiz_count" | "question_count" | "participant_count" | "perfect_score" | "speed" | "streak" | "exploration" | "first_place_count" | "speed_first_place" | "perfect_first_place" | "first_place_streak"
     value: number
     condition?: string
   }
