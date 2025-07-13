@@ -8,12 +8,12 @@
     "pnpm": ">=7.0.0"
   },
   "scripts": {
-    "build": "pnpm install && next build",
-    "build:deploy": "pnpm install && next build",
+    "build": "next build",
+    "build:deploy": "next build",
     "dev": "node server.js",
     "dev:next": "next dev",
     "lint": "next lint",
-    "start": "set NODE_ENV=production && node server.js"
+    "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@aws-sdk/credential-providers": "latest",
