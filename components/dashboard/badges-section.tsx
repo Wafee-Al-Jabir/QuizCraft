@@ -10,6 +10,7 @@ import { Trophy, Star, Zap, Users, Target, Rocket, Globe, Award, Flame, ArrowRig
 import { useBadgeNotifications } from "@/components/ui/badge-notification"
 import { StreakCounter } from "@/components/ui/streak-counter"
 import { cn } from "@/lib/utils"
+import type { LinkProps } from 'next/link'
 import Link from "next/link"
 import type { Badge, UserBadge, User } from "@/lib/types"
 

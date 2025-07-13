@@ -8,11 +8,11 @@
     "pnpm": ">=7.0.0"
   },
   "scripts": {
-    "build": "next build",
-    "build:deploy": "next build",
+    "build": "npx next build",
+    "build:deploy": "npx next build",
     "dev": "node server.js",
-    "dev:next": "next dev",
-    "lint": "next lint",
+    "dev:next": "npx next dev",
+    "lint": "npx next lint",
     "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
@@ -63,6 +63,7 @@
     "mongodb-client-encryption": "latest",
     "next": "^14.2.30",
     "next-themes": "^0.4.4",
+    "npx": "^10.2.2",
     "react": "^18",
     "react-day-picker": "8.10.1",
     "react-dom": "^18",
@@ -85,7 +86,6 @@
     "@types/react-dom": "^18",
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5",
-    "next": "^15.3.5"
+    "typescript": "^5"
   }
 }
