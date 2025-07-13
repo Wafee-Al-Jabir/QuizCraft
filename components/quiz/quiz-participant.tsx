@@ -76,6 +76,15 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
       setQuizInfo(data.quiz)
       setIsJoining(false)
       setError('')
+      
+      // If quiz is already active, set the current question immediately
+      if (data.isActive && data.currentQuestion) {
+        console.log('Joined active quiz - setting current question:', data.currentQuestion)
+        setCurrentQuestion(data.currentQuestion)
+        setTimeLeft(data.currentQuestion.question.timeLimit)
+        setIsAnswered(false)
+        setSelectedAnswer(data.currentQuestion.question.type === 'multiple-choice' ? [] : 0)
+      }
     })
 
     // Listen for join errors

@@ -66,11 +66,22 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
   useEffect(() => {
     if (!socket || !isConnected) return
 
+    console.log('Attempting to host quiz:', quiz.title)
+    
     // Host the quiz when component mounts
     socket.emit('host-quiz', {
       quizId: quiz.id,
       hostId: 'host', // In a real app, this would be the actual host ID
       quiz: quiz
+    })
+    
+    // Add error handling
+    socket.on('error', (error) => {
+      console.error('Socket error:', error)
+    })
+    
+    socket.on('connect_error', (error) => {
+      console.error('Connection error:', error)
     })
 
     // Listen for quiz hosted confirmation
@@ -137,6 +148,8 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
       socket.off('participant-answered')
       socket.off('quiz-finished')
       socket.off('poll-response')
+      socket.off('error')
+      socket.off('connect_error')
     }
   }, [socket, isConnected, quiz])
 

@@ -72,11 +72,6 @@ app.prepare().then(() => {
         return
       }
       
-      if (session.isActive) {
-        socket.emit('join-error', { message: 'Quiz has already started' })
-        return
-      }
-      
       const participantId = socket.id
       const participant = {
         id: participantId,
@@ -91,7 +86,7 @@ app.prepare().then(() => {
       socket.join(`quiz-${sessionCode}`)
       
       // Notify participant
-      socket.emit('joined-quiz', { 
+      const joinResponse = { 
         sessionCode, 
         participantId, 
         quiz: {
@@ -99,7 +94,37 @@ app.prepare().then(() => {
           description: session.quiz.description,
           questionCount: session.quiz.questions.length
         }
-      })
+      }
+      
+      // If quiz is active, send current question immediately
+      if (session.isActive && session.currentQuestion >= 0) {
+        const currentQuestion = session.quiz.questions[session.currentQuestion]
+        const questionData = {
+          questionNumber: session.currentQuestion + 1,
+          totalQuestions: session.quiz.questions.length,
+          question: {
+            id: currentQuestion.id,
+            text: currentQuestion.question,
+            question: currentQuestion.question,
+            type: currentQuestion.type,
+            options: currentQuestion.options,
+            timeLimit: currentQuestion.settings?.timeLimit || 30,
+            correctAnswers: currentQuestion.correctAnswers,
+            settings: currentQuestion.settings,
+            image: currentQuestion.image
+          }
+        }
+        
+        joinResponse.isActive = true
+        joinResponse.currentQuestion = questionData
+        
+        socket.emit('joined-quiz', joinResponse)
+        // Send quiz-started event to sync with current question
+        socket.emit('quiz-started', questionData)
+      } else {
+        joinResponse.isActive = false
+        socket.emit('joined-quiz', joinResponse)
+      }
       
       // Notify host and other participants
       io.to(`quiz-${sessionCode}`).emit('participant-joined', {
@@ -111,7 +136,7 @@ app.prepare().then(() => {
         totalParticipants: session.participants.size
       })
       
-      console.log(`${participantName} joined quiz ${sessionCode}`)
+      console.log(`${participantName} joined quiz ${sessionCode}${session.isActive ? ' (quiz in progress)' : ''}`)
     })
 
     // Host starts the quiz

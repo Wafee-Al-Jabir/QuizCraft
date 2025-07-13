@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
+import { SocketProvider } from "@/lib/socket-context"
 
 export const metadata: Metadata = {
   title: "QuizCraft",
@@ -32,7 +33,11 @@ export default function RootLayout({
           />
         </noscript>
       </head>
-      <body className="font-[Poppins] bg-background text-foreground">{children}</body>
+      <body className="font-[Poppins] bg-background text-foreground">
+        <SocketProvider>
+          {children}
+        </SocketProvider>
+      </body>
     </html>
   )
 }
