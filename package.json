@@ -10,6 +10,7 @@
   "scripts": {
     "build": "npx next build",
     "build:deploy": "npx next build",
+    "build:test": "node scripts/test-build.js",
     "dev": "node server.js",
     "dev:next": "npx next dev",
     "lint": "npx next lint",
@@ -54,7 +55,7 @@
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "embla-carousel-react": "8.5.1",
-    "framer-motion": "^11.11.17",
+    "framer-motion": "11.11.17",
     "gcp-metadata": "latest",
     "input-otp": "1.4.1",
     "kerberos": "latest",

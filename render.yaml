@@ -1,0 +1,24 @@
+services:
+  - type: web
+    runtime: node
+    name: quizcraft
+    plan: free
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 18.18.0
+      - key: NPM_VERSION
+        value: 9.8.1
+      - key: PNPM_VERSION
+        value: 8.10.1
+      - key: MONGODB_URI
+        value: mongodb+srv://wafeealjabir:Wafee2015@quizcraft.a8yviuc.mongodb.net/?retryWrites=true&w=majority&appName=QuizCraft
+    autoDeploy: false
+    healthCheckPath: /
+    disk:
+      name: quizcraft-disk
+      mountPath: /opt/render/project/src
+      sizeGB: 1
