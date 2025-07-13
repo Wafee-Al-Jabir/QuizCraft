@@ -8,8 +8,8 @@
     "pnpm": ">=7.0.0"
   },
   "scripts": {
-    "build": "npm install && next build",
-    "build:deploy": "npm install && next build",
+    "build": "pnpm install && next build",
+    "build:deploy": "pnpm install && next build",
     "dev": "node server.js",
     "dev:next": "next dev",
     "lint": "next lint",
