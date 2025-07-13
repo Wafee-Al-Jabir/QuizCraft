@@ -10,9 +10,6 @@ const nextConfig = {
     unoptimized: true,
   },
   transpilePackages: ['framer-motion'],
-  experimental: {
-    esmExternals: 'loose',
-  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -20,6 +17,13 @@ const nextConfig = {
         fs: false,
       };
     }
+    
+    // Ensure framer-motion is properly resolved
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'framer-motion': 'framer-motion',
+    };
+    
     return config;
   },
 }

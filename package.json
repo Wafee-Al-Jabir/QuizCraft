@@ -13,7 +13,7 @@
     "dev": "node server.js",
     "dev:next": "npx next dev",
     "lint": "npx next lint",
-    "start": "NODE_ENV=production node server.js"
+    "start": "set NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@aws-sdk/credential-providers": "latest",
@@ -58,6 +58,7 @@
     "gcp-metadata": "latest",
     "input-otp": "1.4.1",
     "kerberos": "latest",
+    "libnpx": "^10.2.4",
     "lucide-react": "^0.454.0",
     "mongodb": "^6.17.0",
     "mongodb-client-encryption": "latest",
