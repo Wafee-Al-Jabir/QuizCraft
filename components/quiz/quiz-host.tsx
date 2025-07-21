@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Users, Play, SkipForward, Trophy, Clock, CheckCircle, BarChart3, MessageSquare } from 'lucide-react'
 import { useSocket } from '@/lib/socket-context'
 import { saveLiveSessionParticipants } from '@/lib/quiz-actions'
+import { SimpleThemeToggle } from '@/components/ui/theme-toggle'
 import type { Quiz } from '@/lib/types'
 
 interface QuizHostProps {
@@ -297,16 +298,16 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
               <div className="space-y-3 sm:space-y-4">
                 <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Final Leaderboard</h3>
                 {leaderboard.map((participant, index) => (
-                  <div key={participant.id} className="flex items-center justify-between p-3 sm:p-4 bg-gray-800 dark:bg-gray-700 rounded-lg">
+                  <div key={participant.id} className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg border border-gray-600">
                             <div className="flex items-center space-x-2 sm:space-x-3">
-                              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base ${
+                              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg ${
                                 index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-600' : index === 2 ? 'bg-orange-400' : 'bg-gray-700'
                               }`}>
                                 {index + 1}
                               </div>
-                              <span className="font-medium text-sm sm:text-base text-white">{participant.name}</span>
+                              <span className="font-semibold text-sm sm:text-lg text-white">{participant.name}</span>
                             </div>
-                            <Badge variant="secondary" className="text-xs sm:text-sm">{participant.score} points</Badge>
+                            <Badge variant="secondary" className="text-sm sm:text-lg px-2 sm:px-3 py-1">{participant.score} points</Badge>
                           </div>
                 ))}
               </div>
@@ -333,10 +334,13 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
             {sessionCode && (
               <div className="text-center">
                 <div className="text-xs sm:text-sm text-gray-300">Session Code</div>
-                <div className="text-xl sm:text-2xl font-bold text-indigo-600">{sessionCode}</div>
+                <div className="text-xl sm:text-2xl font-bold text-indigo-600" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
               </div>
             )}
-            <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">Close</Button>
+            <div className="flex items-center space-x-2">
+              <SimpleThemeToggle />
+              <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">Close</Button>
+            </div>
           </div>
         </div>
 
@@ -356,7 +360,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-6 sm:py-8">
-                    <div className="text-4xl sm:text-6xl font-bold text-indigo-600 mb-3 sm:mb-4">{sessionCode}</div>
+                    <div className="text-4xl sm:text-6xl font-bold text-indigo-600 mb-3 sm:mb-4" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
                     <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Participants can join using this code</p>
                     <Button 
                       onClick={startQuiz} 

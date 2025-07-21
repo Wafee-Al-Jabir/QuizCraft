@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
 import { SocketProvider } from "@/lib/socket-context"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "QuizCraft",
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           rel="preload"
@@ -34,9 +35,16 @@ export default function RootLayout({
         </noscript>
       </head>
       <body className="font-[Poppins] bg-background text-foreground">
-        <SocketProvider>
-          {children}
-        </SocketProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SocketProvider>
+            {children}
+          </SocketProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
