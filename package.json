@@ -8,13 +8,13 @@
     "pnpm": ">=7.0.0"
   },
   "scripts": {
-    "build": "pnpm exec next build",
+    "build": "npm exec next build",
     "build:win": "build.bat",
-    "build:deploy": "pnpm exec next build",
+    "build:deploy": "npm exec next build",
     "build:test": "node scripts/test-build.js",
     "dev": "node server.js",
-    "dev:next": "pnpm exec next dev",
-    "lint": "pnpm exec next lint",
+    "dev:next": "npm exec next dev",
+    "lint": "npm exec next lint",
     "start": "set NODE_ENV=production && node server.js"
   },
   "dependencies": {
