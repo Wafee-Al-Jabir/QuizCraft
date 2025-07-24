@@ -228,13 +228,14 @@ app.prepare().then(() => {
       
       if (isCorrect) {
         // Award points based on question settings and time bonus
-        const basePoints = currentQuestion.settings?.points || 1000
+        const basePoints = currentQuestion.settings?.points || 500
         const timeLimit = currentQuestion.settings?.timeLimit || 30
         
-        // Calculate time bonus (same logic as client-side)
+        // Calculate time bonus (scaled to keep total in 500-900 range)
         let timeBonus = 0
         if (timeLimit && timeSpent < timeLimit) {
-          timeBonus = Math.floor((1 - timeSpent / timeLimit) * 5)
+          // Time bonus can add up to 400 points (making max 900)
+          timeBonus = Math.floor((1 - timeSpent / timeLimit) * 400)
         }
         
         points = basePoints + timeBonus

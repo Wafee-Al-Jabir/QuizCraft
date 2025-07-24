@@ -385,10 +385,25 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                       {timeLeft}s
                     </Badge>
                   </div>
-                  <Progress 
-                    value={(currentQuestion.questionNumber / currentQuestion.totalQuestions) * 100} 
-                    className="w-full mt-2"
-                  />
+                  <div className="space-y-2">
+                    <Progress 
+                      value={(currentQuestion.questionNumber / currentQuestion.totalQuestions) * 100} 
+                      className="w-full"
+                    />
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Time Remaining</span>
+                        <span>{timeLeft}s / {currentQuestion.question.timeLimit}s</span>
+                      </div>
+                      <Progress 
+                        value={(timeLeft / currentQuestion.question.timeLimit) * 100}
+                        className="w-full h-2"
+                        style={{
+                          '--progress-background': timeLeft <= 10 ? '#ef4444' : timeLeft <= 20 ? '#f59e0b' : '#10b981'
+                        } as React.CSSProperties}
+                      />
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4 sm:space-y-6">
