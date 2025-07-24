@@ -32,25 +32,37 @@ export function Leaderboard({
               key={participant.id}
               className={`flex items-center justify-between p-2 sm:p-3 rounded-lg ${
                 participant.id === currentParticipantId
-                  ? "bg-indigo-100 border border-indigo-300"
+                  ? "bg-indigo-100 dark:bg-indigo-900 border border-indigo-300 dark:border-indigo-600"
                   : index % 2 === 0
                       ? "bg-gray-800 dark:bg-gray-700"
                       : "bg-gray-700 dark:bg-gray-600"
               }`}
             >
               <div className="flex items-center min-w-0 flex-1">
-                <span className="w-6 sm:w-8 text-center font-bold shrink-0">
+                <span className={`w-6 sm:w-8 text-center font-bold shrink-0 ${
+                  participant.id === currentParticipantId
+                    ? "text-indigo-800 dark:text-indigo-200"
+                    : "text-white"
+                }`}>
                   {index === 0 && <Medal className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 inline" />}
                   {index === 1 && <Medal className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 inline" />}
                   {index === 2 && <Medal className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700 inline" />}
                   {index > 2 && `${index + 1}.`}
                 </span>
-                <span className="font-medium ml-1 sm:ml-2 text-sm sm:text-base truncate">{participant.name}</span>
+                <span className={`font-medium ml-1 sm:ml-2 text-sm sm:text-base truncate ${
+                  participant.id === currentParticipantId
+                    ? "text-indigo-900 dark:text-indigo-100"
+                    : "text-white"
+                }`}>{participant.name}</span>
                 {participant.id === currentParticipantId && (
-                  <span className="ml-1 sm:ml-2 text-xs bg-indigo-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full shrink-0">You</span>
+                  <span className="ml-1 sm:ml-2 text-xs bg-indigo-600 dark:bg-indigo-500 text-white px-1.5 sm:px-2 py-0.5 rounded-full shrink-0">You</span>
                 )}
               </div>
-              <span className="font-bold text-sm sm:text-base shrink-0">{participant.score} pts</span>
+              <span className={`font-bold text-sm sm:text-base shrink-0 ${
+                participant.id === currentParticipantId
+                  ? "text-indigo-900 dark:text-indigo-100"
+                  : "text-white"
+              }`}>{participant.score} pts</span>
             </div>
           ))
         )}

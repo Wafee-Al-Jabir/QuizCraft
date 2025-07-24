@@ -7,10 +7,11 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Users, Play, SkipForward, Trophy, Clock, CheckCircle, BarChart3, MessageSquare } from 'lucide-react'
+import { Users, Play, SkipForward, Trophy, Clock, CheckCircle, BarChart3, MessageSquare, QrCode, Copy } from 'lucide-react'
 import { useSocket } from '@/lib/socket-context'
 import { saveLiveSessionParticipants } from '@/lib/quiz-actions'
 import { SimpleThemeToggle } from '@/components/ui/theme-toggle'
+import QRCode from 'qrcode'
 import type { Quiz } from '@/lib/types'
 
 interface QuizHostProps {
@@ -63,6 +64,8 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
   const [pollResults, setPollResults] = useState<{[key: string]: number}>({})
   const [activePoll, setActivePoll] = useState<{question: string, options: string[]} | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(0)
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('')
+  const [showQrCode, setShowQrCode] = useState(false)
 
   useEffect(() => {
     if (!socket || !isConnected) return
@@ -86,9 +89,25 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     })
 
     // Listen for quiz hosted confirmation
-    socket.on('quiz-hosted', (data) => {
+    socket.on('quiz-hosted', async (data) => {
       setSessionCode(data.sessionCode)
       console.log('Quiz hosted with code:', data.sessionCode)
+      
+      // Generate QR code for the session
+      try {
+        const joinUrl = `${window.location.origin}/join?code=${data.sessionCode}`
+        const qrCodeDataUrl = await QRCode.toDataURL(joinUrl, {
+          width: 256,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        })
+        setQrCodeUrl(qrCodeDataUrl)
+      } catch (error) {
+        console.error('Failed to generate QR code:', error)
+      }
     })
 
     // Listen for participants joining
@@ -362,6 +381,38 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                   <div className="text-center py-6 sm:py-8">
                     <div className="text-4xl sm:text-6xl font-bold text-indigo-600 mb-3 sm:mb-4" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
                     <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Participants can join using this code</p>
+                    
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowQrCode(!showQrCode)}
+                        className="flex items-center gap-2"
+                      >
+                        <QrCode className="h-4 w-4" />
+                        {showQrCode ? 'Hide QR Code' : 'Show QR Code'}
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        onClick={() => navigator.clipboard.writeText(sessionCode)}
+                        className="flex items-center gap-2"
+                      >
+                        <Copy className="h-4 w-4" />
+                        Copy Code
+                      </Button>
+                    </div>
+                    
+                    {showQrCode && qrCodeUrl && (
+                      <div className="mb-4 sm:mb-6">
+                        <img 
+                          src={qrCodeUrl} 
+                          alt="QR Code to join quiz" 
+                          className="mx-auto w-48 h-48 sm:w-64 sm:h-64 border-2 border-gray-300 rounded-lg"
+                        />
+                        <p className="text-xs sm:text-sm text-gray-500 mt-2">Scan to join the quiz</p>
+                      </div>
+                    )}
+                    
                     <Button 
                       onClick={startQuiz} 
                       disabled={participants.length === 0}

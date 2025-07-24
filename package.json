@@ -8,7 +8,7 @@
     "pnpm": ">=7.0.0"
   },
   "scripts": {
-    "build": "npm install && pnpm install --save-dev typescript && npm exec next build",
+    "build": "pnpm install --save-dev typescript && npm install && npm exec next build",
     "build:win": "build.bat",
     "build:deploy": "npm exec next build",
     "build:test": "node scripts/test-build.js",
@@ -48,6 +48,7 @@
     "@radix-ui/react-toggle": "1.1.1",
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
+    "@types/qrcode": "^1.5.5",
     "@types/socket.io": "^3.0.1",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
@@ -68,6 +69,7 @@
     "next-themes": "^0.4.4",
     "npx": "^3.0.0",
     "nvm": "^0.0.4",
+    "qrcode": "^1.5.4",
     "react": "^18",
     "react-day-picker": "8.10.1",
     "react-dom": "^18",
