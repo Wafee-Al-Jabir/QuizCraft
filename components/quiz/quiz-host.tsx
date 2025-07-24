@@ -65,7 +65,6 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
   const [activePoll, setActivePoll] = useState<{question: string, options: string[]} | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('')
-  const [showQrCode, setShowQrCode] = useState(false)
 
   useEffect(() => {
     if (!socket || !isConnected) return
@@ -95,9 +94,9 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
       
       // Generate QR code for the session
       try {
-        const joinUrl = `${window.location.origin}/join?code=${data.sessionCode}`
+        const joinUrl = `${window.location.origin}/quiz/join?code=${data.sessionCode}`
         const qrCodeDataUrl = await QRCode.toDataURL(joinUrl, {
-          width: 256,
+          width: 300,
           margin: 2,
           color: {
             dark: '#000000',
@@ -382,16 +381,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                     <div className="text-4xl sm:text-6xl font-bold text-indigo-600 mb-3 sm:mb-4" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
                     <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Participants can join using this code</p>
                     
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setShowQrCode(!showQrCode)}
-                        className="flex items-center gap-2"
-                      >
-                        <QrCode className="h-4 w-4" />
-                        {showQrCode ? 'Hide QR Code' : 'Show QR Code'}
-                      </Button>
-                      
+                    <div className="flex justify-center mb-4 sm:mb-6">
                       <Button 
                         variant="outline" 
                         onClick={() => navigator.clipboard.writeText(sessionCode)}
@@ -401,17 +391,6 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                         Copy Code
                       </Button>
                     </div>
-                    
-                    {showQrCode && qrCodeUrl && (
-                      <div className="mb-4 sm:mb-6">
-                        <img 
-                          src={qrCodeUrl} 
-                          alt="QR Code to join quiz" 
-                          className="mx-auto w-48 h-48 sm:w-64 sm:h-64 border-2 border-gray-300 rounded-lg"
-                        />
-                        <p className="text-xs sm:text-sm text-gray-500 mt-2">Scan to join the quiz</p>
-                      </div>
-                    )}
                     
                     <Button 
                       onClick={startQuiz} 
@@ -619,6 +598,47 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                 </div>
               </CardContent>
             </Card>
+            
+            {/* QR Code Section - Always Visible */}
+            {sessionCode && (
+              <Card className="mt-3 sm:mt-4">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <QrCode className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                    Join Quiz
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <div className="space-y-3">
+                    <div className="text-2xl font-bold text-indigo-600" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>
+                      {sessionCode}
+                    </div>
+                    
+                    {qrCodeUrl && (
+                      <div className="flex justify-center">
+                        <img 
+                          src={qrCodeUrl} 
+                          alt="QR Code to join quiz" 
+                          className="w-48 h-48 border-2 border-gray-300 rounded-lg"
+                        />
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-gray-500">Scan QR code or use session code to join</p>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigator.clipboard.writeText(sessionCode)}
+                      className="flex items-center gap-2 w-full"
+                    >
+                      <Copy className="h-3 w-3" />
+                      Copy Code
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             
             {/* Poll Creation Form */}
             {!isWaitingRoom && (
