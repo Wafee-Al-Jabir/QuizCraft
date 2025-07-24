@@ -51,6 +51,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
   const [participantName, setParticipantName] = useState('')
   const [isJoining, setIsJoining] = useState(false)
   const [hasJoined, setHasJoined] = useState(false)
+  const [joinStep, setJoinStep] = useState<'code' | 'name'>('code')
   const [quizInfo, setQuizInfo] = useState<QuizInfo | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | number[]>([])
@@ -207,6 +208,15 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
     return () => clearInterval(timer)
   }, [currentQuestion, timeLeft])
 
+  const verifyCode = () => {
+    if (!sessionCode.trim()) return
+    
+    // For now, just move to name step
+    // In a real implementation, you might want to verify the code exists first
+    setJoinStep('name')
+    setError('')
+  }
+
   const joinQuiz = () => {
     if (!socket || !sessionCode.trim() || !participantName.trim()) return
     
@@ -350,51 +360,88 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
       <div className="min-h-screen bg-black dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle>Join Quiz</CardTitle>
-            <CardDescription>Enter the session code to join a live quiz</CardDescription>
+            <CardTitle className="font-sans">
+              {joinStep === 'code' ? 'Enter Quiz Code' : 'Enter Your Name'}
+            </CardTitle>
+            <CardDescription className="font-sans">
+              {joinStep === 'code' 
+                ? 'Enter the 6-digit session code to continue' 
+                : 'Choose a name to join the quiz'
+              }
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription className="font-sans">{error}</AlertDescription>
               </Alert>
             )}
             
-            <div className="space-y-2">
-              <Label htmlFor="sessionCode">Session Code</Label>
-              <Input
-                id="sessionCode"
-                placeholder="Enter 6-digit code"
-                value={sessionCode}
-                onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
-                maxLength={6}
-                className="text-center text-lg font-mono"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="participantName">Your Name</Label>
-              <Input
-                id="participantName"
-                placeholder="Enter your name"
-                value={participantName}
-                onChange={(e) => setParticipantName(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex space-x-2">
-              <Button 
-                onClick={joinQuiz} 
-                disabled={!sessionCode.trim() || !participantName.trim() || isJoining}
-                className="flex-1"
-              >
-                {isJoining ? 'Joining...' : 'Join Quiz'}
-              </Button>
-              <Button variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-            </div>
+            {joinStep === 'code' ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="sessionCode" className="font-sans">Session Code</Label>
+                  <Input
+                    id="sessionCode"
+                    placeholder="Enter 6-digit code"
+                    value={sessionCode}
+                    onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
+                    maxLength={6}
+                    className="text-center text-lg font-sans tracking-wider"
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={verifyCode} 
+                    disabled={!sessionCode.trim() || sessionCode.length !== 6}
+                    className="flex-1 font-sans"
+                  >
+                    Next
+                  </Button>
+                  <Button variant="outline" onClick={onClose} className="font-sans">
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="participantName" className="font-sans">Your Name</Label>
+                  <Input
+                    id="participantName"
+                    placeholder="Enter your name"
+                    value={participantName}
+                    onChange={(e) => setParticipantName(e.target.value)}
+                    className="font-sans"
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="text-sm text-gray-500 font-sans">
+                  Quiz Code: <span className="font-mono tracking-wider">{sessionCode}</span>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline"
+                    onClick={() => setJoinStep('code')}
+                    className="font-sans"
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={joinQuiz} 
+                    disabled={!participantName.trim() || isJoining}
+                    className="flex-1 font-sans"
+                  >
+                    {isJoining ? 'Joining...' : 'Join Quiz'}
+                  </Button>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

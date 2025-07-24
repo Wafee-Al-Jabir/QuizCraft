@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { AlertCircle, Trophy, Clock, Users } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
+import { WaitingRoomGame } from './waiting-room-game'
 
 interface QuizParticipantWithCodeProps {
   sessionCode: string
@@ -309,26 +310,28 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
       <div className="min-h-screen bg-black dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
         <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle>Join Quiz</CardTitle>
-            <CardDescription>
-              Session Code: <span className="font-mono text-lg font-bold text-slate-800 dark:text-slate-200">{sessionCode}</span>
+            <CardTitle className="font-sans">Enter Your Name</CardTitle>
+            <CardDescription className="font-sans">
+              Enter your name to join quiz with code: <span className="font-mono tracking-wider">{sessionCode}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription className="font-sans">{error}</AlertDescription>
               </Alert>
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="participantName">Your Name</Label>
+              <Label htmlFor="participantName" className="font-sans">Your Name</Label>
               <Input
                 id="participantName"
                 placeholder="Enter your name"
                 value={participantName}
                 onChange={(e) => setParticipantName(e.target.value)}
+                className="font-sans"
+                autoFocus
                 onKeyPress={(e) => {
                   if (e.key === 'Enter' && participantName.trim()) {
                     joinQuiz()
@@ -341,11 +344,11 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
               <Button 
                 onClick={joinQuiz} 
                 disabled={!participantName.trim() || isJoining}
-                className="flex-1"
+                className="flex-1 font-sans"
               >
                 {isJoining ? 'Joining...' : 'Join Quiz'}
               </Button>
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="outline" onClick={onClose} className="font-sans">
                 Cancel
               </Button>
             </div>
@@ -495,40 +498,10 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
 
   // Waiting room
   return (
-    <div className="min-h-screen bg-black p-4">
-      <div className="max-w-2xl mx-auto">
-        <Card className="dark:bg-gray-800 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle>Waiting for Quiz to Start</CardTitle>
-            <CardDescription>
-              {quizInfo ? `${quizInfo.title} - ${quizInfo.totalQuestions} questions` : 'Loading quiz info...'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Users className="h-4 w-4" />
-                <span>{participants.length} participant{participants.length !== 1 ? 's' : ''} joined</span>
-              </div>
-              
-              <div className="space-y-2">
-                {participants.map((participant) => (
-                  <div key={participant.id} className="flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded">
-                    <span className={participant.name === participantName ? 'font-bold' : ''}>
-                      {participant.name}
-                      {participant.name === participantName && ' (You)'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                Waiting for the host to start the quiz...
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <WaitingRoomGame 
+      participants={participants}
+      participantName={participantName}
+      quizInfo={quizInfo}
+    />
   )
 }
