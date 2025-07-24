@@ -41,8 +41,8 @@ export function Leaderboard({
               <div className="flex items-center min-w-0 flex-1">
                 <span className={`w-6 sm:w-8 text-center font-bold shrink-0 ${
                   participant.id === currentParticipantId
-                    ? "text-indigo-800 dark:text-indigo-200"
-                    : "text-white"
+                    ? "text-black dark:text-black"
+                    : "text-black dark:text-black"
                 }`}>
                   {index === 0 && <Medal className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 inline" />}
                   {index === 1 && <Medal className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 inline" />}
