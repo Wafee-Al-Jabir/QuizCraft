@@ -94,7 +94,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
       
       // Generate QR code for the session
       try {
-        const joinUrl = `${window.location.origin}/quiz/join?code=${data.sessionCode}`
+        const joinUrl = `${window.location.origin}/quiz/join/${data.sessionCode}`
         const qrCodeDataUrl = await QRCode.toDataURL(joinUrl, {
           width: 300,
           margin: 2,
@@ -352,7 +352,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
             {sessionCode && (
               <div className="text-center">
                 <div className="text-xs sm:text-sm text-gray-300">Session Code</div>
-                <div className="text-xl sm:text-2xl font-bold text-indigo-600" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
+                <div className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
               </div>
             )}
             <div className="flex items-center space-x-2">
@@ -378,7 +378,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-6 sm:py-8">
-                    <div className="text-4xl sm:text-6xl font-bold text-indigo-600 mb-3 sm:mb-4" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
+                    <div className="text-4xl sm:text-6xl font-bold text-slate-800 dark:text-slate-200 mb-3 sm:mb-4" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
                     <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Participants can join using this code</p>
                     
                     <div className="flex justify-center mb-4 sm:mb-6">
@@ -581,7 +581,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                       .map((participant, index) => (
                         <div key={participant.id} className="flex items-center justify-between p-2 sm:p-3 bg-gray-800 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center space-x-2">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-slate-700 dark:bg-slate-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
                               {index + 1}
                             </div>
                             <span className="font-medium text-xs sm:text-sm text-white">{participant.name}</span>
@@ -610,7 +610,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                 </CardHeader>
                 <CardContent className="text-center">
                   <div className="space-y-3">
-                    <div className="text-2xl font-bold text-indigo-600" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>
+                    <div className="text-2xl font-bold text-slate-800 dark:text-slate-200" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>
                       {sessionCode}
                     </div>
                     
