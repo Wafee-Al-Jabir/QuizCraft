@@ -51,8 +51,8 @@ export function Leaderboard({
                 </span>
                 <span className={`font-medium ml-1 sm:ml-2 text-sm sm:text-base truncate ${
                   participant.id === currentParticipantId
-                    ? "text-indigo-900 dark:text-indigo-100"
-                    : "text-white"
+                    ? "text-black dark:text-black"
+                    : "text-black dark:text-black"
                 }`}>{participant.name}</span>
                 {participant.id === currentParticipantId && (
                   <span className="ml-1 sm:ml-2 text-xs bg-indigo-600 dark:bg-indigo-500 text-white px-1.5 sm:px-2 py-0.5 rounded-full shrink-0">You</span>
@@ -60,8 +60,8 @@ export function Leaderboard({
               </div>
               <span className={`font-bold text-sm sm:text-base shrink-0 ${
                 participant.id === currentParticipantId
-                  ? "text-indigo-900 dark:text-indigo-100"
-                  : "text-white"
+                  ? "text-black dark:text-black"
+                  : "text-black dark:text-black"
               }`}>{participant.score} pts</span>
             </div>
           ))
