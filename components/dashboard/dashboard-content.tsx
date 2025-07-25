@@ -8,7 +8,7 @@ import { AnimatedCard, StaggeredContainer } from "@/components/ui/micro-interact
 import { motion } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { SimpleThemeToggle } from "@/components/ui/theme-toggle"
-import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle, UserPlus, Trophy, Upload } from "lucide-react"
+import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle, UserPlus, Trophy, Upload, Download, Copy } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { signOut } from "@/lib/auth-actions"
@@ -40,6 +40,9 @@ export function DashboardContent({ user }: DashboardContentProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [importJson, setImportJson] = useState("")
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [exportJson, setExportJson] = useState('')
+  const [exportingQuizId, setExportingQuizId] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -82,6 +85,39 @@ export function DashboardContent({ user }: DashboardContentProps) {
       }
     } catch (error) {
       console.error("Failed to toggle quiz publication:", error)
+    }
+  }
+
+  const handleExportQuiz = (quizId: string) => {
+    const quiz = quizzes.find(q => q.id === quizId)
+    if (!quiz) return
+
+    const exportData = {
+      title: quiz.title,
+      description: quiz.description,
+      questions: quiz.questions.map(q => ({
+        type: q.type,
+        question: q.question,
+        options: q.options,
+        correctAnswers: q.correctAnswers,
+        settings: q.settings,
+        ...(q.image && { image: q.image })
+      })),
+      settings: quiz.settings
+    }
+    
+    const jsonString = JSON.stringify(exportData, null, 2)
+    setExportJson(jsonString)
+    setExportingQuizId(quizId)
+    setShowExportModal(true)
+  }
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(exportJson)
+      alert('Quiz JSON copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy: ', err)
     }
   }
 
@@ -382,6 +418,10 @@ export function DashboardContent({ user }: DashboardContentProps) {
                     </div>
                     <div className="flex flex-col sm:flex-row lg:flex-row items-start sm:items-center gap-2 sm:gap-2">
                       <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleExportQuiz(quiz.id)}>
+                          <Download className="h-4 w-4 mr-1 sm:mr-2" />
+                          <span className="hidden sm:inline">Export</span>
+                        </Button>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -473,6 +513,37 @@ export function DashboardContent({ user }: DashboardContentProps) {
           </div>
         )}
       </div>
+
+      {/* Export Modal */}
+      <Dialog open={showExportModal} onOpenChange={setShowExportModal}>
+        <DialogContent className="bg-black border-gray-700 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Export Quiz</DialogTitle>
+            <DialogDescription>
+              Copy the JSON below to import this quiz elsewhere
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <Textarea
+                value={exportJson}
+                readOnly
+                className="font-mono text-xs bg-gray-900 border-gray-700 min-h-[300px]"
+                placeholder="Quiz JSON will appear here..."
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowExportModal(false)}>
+                Close
+              </Button>
+              <Button onClick={copyToClipboard}>
+                <Copy className="mr-2 h-4 w-4" />
+                Copy to Clipboard
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

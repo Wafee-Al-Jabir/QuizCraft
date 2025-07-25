@@ -278,6 +278,10 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
           </Button>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Edit Quiz</h1>
         </div>
+        <Button variant="outline" onClick={handleExportQuiz} className="w-full sm:w-auto">
+          <Download className="mr-2 h-4 w-4" />
+          Export Quiz
+        </Button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
@@ -646,10 +650,7 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
                 </div>
               </DialogContent>
             </Dialog>
-            <Button type="button" variant="outline" onClick={handleExportQuiz} className="w-full sm:w-auto">
-              <Download className="mr-2 h-4 w-4" />
-              Export Quiz
-            </Button>
+
             <Dialog open={showPreview} onOpenChange={setShowPreview}>
               <DialogTrigger asChild>
                 <Button type="button" variant="outline" className="w-full sm:w-auto">
