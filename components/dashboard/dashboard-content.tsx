@@ -8,7 +8,9 @@ import { AnimatedCard, StaggeredContainer } from "@/components/ui/micro-interact
 import { motion } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { SimpleThemeToggle } from "@/components/ui/theme-toggle"
-import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle, UserPlus, Trophy } from "lucide-react"
+import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle, UserPlus, Trophy, Upload } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 import { signOut } from "@/lib/auth-actions"
 import { getQuizzes, getQuizStats, publishQuiz, deleteQuiz } from "@/lib/quiz-actions"
 import { DashboardLoading } from "@/components/ui/loading"
@@ -36,6 +38,8 @@ export function DashboardContent({ user }: DashboardContentProps) {
     averageScore: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importJson, setImportJson] = useState("")
 
   useEffect(() => {
     async function loadData() {
@@ -108,6 +112,26 @@ export function DashboardContent({ user }: DashboardContentProps) {
       alert("An error occurred while deleting the quiz.")
     }
   }
+
+  const handleImportQuiz = async () => {
+    try {
+      const quizData = JSON.parse(importJson)
+      
+      // Validate required fields
+      if (!quizData.title || !quizData.questions || !Array.isArray(quizData.questions)) {
+        alert("Invalid quiz format. Please ensure the JSON includes 'title' and 'questions' array.")
+        return
+      }
+
+      // Redirect to create quiz page with imported data
+      const encodedData = encodeURIComponent(JSON.stringify(quizData))
+      window.location.href = `/quiz/create?import=${encodedData}`
+    } catch (error) {
+      alert("Invalid JSON format. Please check your data and try again.")
+    }
+  }
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-background dark:to-background/95 transition-all duration-300">
@@ -277,6 +301,40 @@ export function DashboardContent({ user }: DashboardContentProps) {
                 <span className="sm:hidden font-medium">Join</span>
               </Button>
             </Link>
+            <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto bg-gradient-to-r from-gray-50 to-white dark:from-card dark:to-card/80 border-2 border-gray-200 dark:border-border hover:border-green-300 dark:hover:border-green-500 hover:shadow-lg transition-all duration-150 hover:scale-105">
+                  <Upload className="h-4 w-4 mr-2 text-green-600 dark:text-green-400" />
+                  <span className="hidden sm:inline font-medium">Import Quiz</span>
+                  <span className="sm:hidden font-medium">Import</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Import Quiz from JSON</DialogTitle>
+                  <DialogDescription>
+                    Paste your quiz JSON data below to import a quiz.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="Paste your quiz JSON here..."
+                    value={importJson}
+                    onChange={(e) => setImportJson(e.target.value)}
+                    rows={10}
+                    className="font-mono text-sm"
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleImportQuiz} disabled={!importJson.trim()}>
+                      Import Quiz
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Link href="/quiz/create" className="w-full sm:w-auto">
               <Button className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-150 hover:scale-105 border-0">
                 <Plus className="h-4 w-4 mr-2" />

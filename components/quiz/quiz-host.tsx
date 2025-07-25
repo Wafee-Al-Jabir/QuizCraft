@@ -94,7 +94,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
       
       // Generate QR code for the session
       try {
-        const joinUrl = `${window.location.origin}/quiz/join/${data.sessionCode}`
+        const joinUrl = `https://quizcraft-knjk.onrender.com/quiz/join/${data.sessionCode}`
         const qrCodeDataUrl = await QRCode.toDataURL(joinUrl, {
           width: 300,
           margin: 2,

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { BookOpen, Plus, Trash2, ArrowLeft, Settings, Clock, Eye } from "lucide-react"
+import { BookOpen, Plus, Trash2, ArrowLeft, Settings, Clock, Eye, Upload } from "lucide-react"
 import { createQuiz } from "@/lib/quiz-actions"
 import type { User, QuizQuestion, QuestionType } from "@/lib/types"
 
@@ -48,6 +48,28 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
       },
     },
   ])
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importJson, setImportJson] = useState("")
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Check for import data in URL
+      const urlParams = new URLSearchParams(window.location.search)
+      const importData = urlParams.get('import')
+      
+      if (importData) {
+        try {
+          const quizData = JSON.parse(decodeURIComponent(importData))
+          handleImportQuiz(quizData)
+          // Remove import parameter from URL
+          window.history.replaceState({}, '', window.location.pathname)
+          return
+        } catch (error) {
+          console.error('Error importing quiz data:', error)
+        }
+      }
+    }
+  }, [])
 
   const addQuestion = () => {
     const newQuestion: QuizQuestion = {
@@ -194,6 +216,40 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
     )
   }
 
+  const handleImportQuiz = (data?: any) => {
+    try {
+      const jsonData = data || JSON.parse(importJson)
+      
+      if (jsonData.title) setTitle(jsonData.title)
+      if (jsonData.description) setDescription(jsonData.description)
+      if (jsonData.settings) setQuizSettings({ ...quizSettings, ...jsonData.settings })
+      if (jsonData.questions && Array.isArray(jsonData.questions)) {
+        const importedQuestions = jsonData.questions.map((q: any, index: number) => ({
+          id: Date.now().toString() + index,
+          question: q.question || q.text || '',
+          options: q.options || ['', '', '', ''],
+          correctAnswers: q.correctAnswers || (q.correctAnswer !== undefined ? [q.correctAnswer] : [0]),
+          type: q.type || 'single-choice',
+          settings: {
+            points: q.settings?.points || q.points || 1000,
+            showLeaderboardAfter: q.settings?.showLeaderboardAfter || false,
+            timeLimit: q.settings?.timeLimit || q.timeLimit
+          },
+          image: q.image
+        }))
+        setQuestions(importedQuestions)
+      }
+      
+      if (!data) {
+        setImportJson('')
+        setShowImportDialog(false)
+      }
+    } catch (error) {
+      console.error('Error importing quiz:', error)
+      alert('Invalid JSON format. Please check your data and try again.')
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -228,10 +284,43 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                 </Button>
               </Link>
               <div className="flex items-center space-x-2">
-                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-gray-900 dark:text-white" />
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Create New Quiz</h1>
-              </div>
+              <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-gray-900 dark:text-white" />
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Create New Quiz</h1>
             </div>
+            <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import Quiz
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Import Quiz from JSON</DialogTitle>
+                  <DialogDescription>
+                    Paste your quiz JSON data below to import a quiz.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="Paste your quiz JSON here..."
+                    value={importJson}
+                    onChange={(e) => setImportJson(e.target.value)}
+                    rows={10}
+                    className="font-mono text-sm"
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleImportQuiz} disabled={!importJson.trim()}>
+                      Import Quiz
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
           </div>
         </div>
       </header>
@@ -593,6 +682,43 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                 Cancel
               </Button>
             </Link>
+            <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+              <DialogTrigger asChild>
+                <Button type="button" variant="outline" className="w-full sm:w-auto">
+                  <Upload className="h-4 w-4 sm:mr-2" />
+                  <span className="ml-2 sm:ml-0">Import Quiz</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto mx-4 sm:mx-auto">
+                <DialogHeader className="pb-3 sm:pb-6">
+                  <DialogTitle className="text-lg sm:text-xl">Import Quiz</DialogTitle>
+                  <DialogDescription className="text-sm sm:text-base">
+                    Paste your quiz JSON data below to import a quiz
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="import-json">Quiz JSON Data</Label>
+                    <Textarea
+                      id="import-json"
+                      value={importJson}
+                      onChange={(e) => setImportJson(e.target.value)}
+                      placeholder={`{\n  "title": "Sample Quiz",\n  "description": "A sample quiz",\n  "settings": {\n    "showLeaderboard": true\n  },\n  "questions": [\n    {\n      "type": "single-choice",\n      "question": "What is 2+2?",\n      "options": ["3", "4", "5", "6"],\n      "correctAnswers": [1],\n      "settings": {\n        "points": 1000\n      }\n    }\n  ]\n}`}
+                      rows={12}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline" onClick={() => setShowImportDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="button" onClick={handleImportQuiz} disabled={!importJson.trim()}>
+                      Import Quiz
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Dialog open={showPreview} onOpenChange={setShowPreview}>
               <DialogTrigger asChild>
                 <Button type="button" variant="outline" disabled={!title || questions.some(q => !q.question)} className="w-full sm:w-auto">

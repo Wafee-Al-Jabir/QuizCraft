@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Trash2, Plus, ArrowLeft, Save, Clock, Eye, Settings } from "lucide-react"
+import { Trash2, Plus, ArrowLeft, Save, Clock, Eye, Settings, Download, Copy } from "lucide-react"
 import { updateQuiz } from "@/lib/quiz-actions"
 import type { Quiz, QuizQuestion, User, QuestionType } from "@/lib/types"
 
@@ -30,6 +30,37 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
   const [showQuizSettings, setShowQuizSettings] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [currentPreviewQuestion, setCurrentPreviewQuestion] = useState(0)
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [exportJson, setExportJson] = useState('')
+
+  const handleExportQuiz = () => {
+    const exportData = {
+      title,
+      description,
+      questions: questions.map(q => ({
+        type: q.type,
+        question: q.question,
+        options: q.options,
+        correctAnswers: q.correctAnswers,
+        settings: q.settings,
+        ...(q.image && { image: q.image })
+      })),
+      settings: quizSettings
+    }
+    
+    const jsonString = JSON.stringify(exportData, null, 2)
+    setExportJson(jsonString)
+    setShowExportModal(true)
+  }
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(exportJson)
+      alert('JSON copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy: ', err)
+    }
+  }
 
   const addQuestion = () => {
     const newQuestion: QuizQuestion = {
@@ -615,6 +646,10 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
                 </div>
               </DialogContent>
             </Dialog>
+            <Button type="button" variant="outline" onClick={handleExportQuiz} className="w-full sm:w-auto">
+              <Download className="mr-2 h-4 w-4" />
+              Export Quiz
+            </Button>
             <Dialog open={showPreview} onOpenChange={setShowPreview}>
               <DialogTrigger asChild>
                 <Button type="button" variant="outline" className="w-full sm:w-auto">
@@ -701,6 +736,37 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
           </div>
         </div>
       </form>
+
+      {/* Export Modal */}
+      <Dialog open={showExportModal} onOpenChange={setShowExportModal}>
+        <DialogContent className="bg-black border-gray-700 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Export Quiz</DialogTitle>
+            <DialogDescription>
+              Copy the JSON below to import this quiz elsewhere
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <Textarea
+                value={exportJson}
+                readOnly
+                className="font-mono text-xs bg-gray-900 border-gray-700 min-h-[300px]"
+                placeholder="Quiz JSON will appear here..."
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowExportModal(false)}>
+                Close
+              </Button>
+              <Button onClick={copyToClipboard}>
+                <Copy className="mr-2 h-4 w-4" />
+                Copy to Clipboard
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
