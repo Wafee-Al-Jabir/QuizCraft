@@ -113,7 +113,7 @@ export function LoadingAnimation({ isVisible, onComplete }: LoadingAnimationProp
               animate={{ opacity: 1 }}
               transition={{ delay: 1, duration: 0.6 }}
             >
-              Preparing your quiz experience...
+              Crafting your quiz experience...
             </motion.p>
             
             {/* Loading Bar */}

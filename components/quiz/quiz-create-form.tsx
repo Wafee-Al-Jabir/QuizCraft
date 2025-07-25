@@ -254,7 +254,55 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
     e.preventDefault()
     setIsLoading(true)
 
+    // Validation
+    if (!title.trim()) {
+      alert('Please enter a quiz title')
+      setIsLoading(false)
+      return
+    }
+
+    if (questions.length === 0) {
+      alert('Please add at least one question')
+      setIsLoading(false)
+      return
+    }
+
+    // Validate each question
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i]
+      if (!question.question.trim()) {
+        alert(`Please enter text for question ${i + 1}`)
+        setIsLoading(false)
+        return
+      }
+
+      if (question.type !== 'open-ended' && question.type !== 'poll') {
+        // Check if at least 2 options are filled
+        const filledOptions = question.options.filter(opt => opt.trim() !== '')
+        if (filledOptions.length < 2) {
+          alert(`Question ${i + 1} needs at least 2 answer options`)
+          setIsLoading(false)
+          return
+        }
+
+        // Check if correct answer is selected
+        if (question.correctAnswers.length === 0) {
+          alert(`Please select the correct answer for question ${i + 1}`)
+          setIsLoading(false)
+          return
+        }
+      }
+    }
+
     try {
+      console.log('Creating quiz with data:', {
+        title,
+        description,
+        questions,
+        userId: user.id,
+        settings: quizSettings,
+      })
+      
       const quiz = await createQuiz({
         title,
         description,
@@ -262,9 +310,12 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
         userId: user.id,
         settings: quizSettings,
       })
+      
+      console.log('Quiz created successfully:', quiz)
       router.push(`/quiz/${quiz.id}/edit`)
     } catch (error) {
       console.error("Failed to create quiz:", error)
+      alert(`Failed to create quiz: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsLoading(false)
     }

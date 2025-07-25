@@ -153,7 +153,7 @@ export function PageLoading({ text = "Loading page..." }: { text?: string }) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          Preparing your quiz experience...
+          Crafting your quiz experience...
         </motion.p>
       </motion.div>
     </div>
