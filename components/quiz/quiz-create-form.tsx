@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Upload, Eye } from "lucide-react"
+import { Upload, Eye, Copy } from "lucide-react"
 
 interface QuizCreateFormProps {
   user: User
@@ -64,6 +64,8 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
   ])
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [importJson, setImportJson] = useState("")
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [exportJson, setExportJson] = useState('')
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -413,16 +415,18 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
       })),
     }
 
-    const dataStr = JSON.stringify(quizData, null, 2)
-    const dataBlob = new Blob([dataStr], { type: "application/json" })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `${title || "quiz"}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    const jsonString = JSON.stringify(quizData, null, 2)
+    setExportJson(jsonString)
+    setShowExportModal(true)
+  }
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(exportJson)
+      alert('JSON copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy: ', err)
+    }
   }
 
   // Rest of your component remains the same...
@@ -920,6 +924,37 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
           </div>
         </form>
       </div>
+
+      {/* Export Modal */}
+      <Dialog open={showExportModal} onOpenChange={setShowExportModal}>
+        <DialogContent className="bg-black border-gray-700 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Export Quiz</DialogTitle>
+            <DialogDescription>
+              Copy the JSON below to import this quiz elsewhere
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <Textarea
+                value={exportJson}
+                readOnly
+                className="font-mono text-xs bg-gray-900 border-gray-700 min-h-[300px]"
+                placeholder="Quiz JSON will appear here..."
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowExportModal(false)}>
+                Close
+              </Button>
+              <Button onClick={copyToClipboard}>
+                <Copy className="mr-2 h-4 w-4" />
+                Copy to Clipboard
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

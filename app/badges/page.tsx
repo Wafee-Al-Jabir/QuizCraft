@@ -179,46 +179,6 @@ const AVAILABLE_BADGES: Badge[] = [
   },
   // Ultimate badges - The highest tier achievements
   {
-    id: "quiz-god",
-    name: "Quiz God",
-    description: "Create 100 quizzes - The ultimate creator",
-    icon: "award",
-    rarity: "ultimate",
-    color: "from-red-500 to-red-700",
-    type: "achievement",
-    requirement: { type: "quiz_count", value: 100 }
-  },
-  {
-    id: "question-architect",
-    name: "Question Architect",
-    description: "Write 1000 questions - Master of knowledge",
-    icon: "zap",
-    rarity: "ultimate",
-    color: "from-red-600 to-red-800",
-    type: "achievement",
-    requirement: { type: "question_count", value: 1000 }
-  },
-  {
-    id: "global-phenomenon",
-    name: "Global Phenomenon",
-    description: "Reach 10,000 total participants across all quizzes",
-    icon: "globe",
-    rarity: "ultimate",
-    color: "from-red-400 to-red-600",
-    type: "achievement",
-    requirement: { type: "participant_count", value: 10000 }
-  },
-  {
-    id: "perfectionist-supreme",
-    name: "Perfectionist Supreme",
-    description: "Maintain 100% average score with 50+ participants",
-    icon: "target",
-    rarity: "ultimate",
-    color: "from-red-500 to-red-700",
-    type: "achievement",
-    requirement: { type: "perfect_score", value: 100 }
-  },
-  {
     id: "ultimate-champion-supreme",
     name: "Ultimate Champion Supreme",
     description: "Win 1st place 100 times - Unbeatable",
