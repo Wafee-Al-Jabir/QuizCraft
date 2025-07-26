@@ -23,6 +23,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 import { Upload, Eye, Copy } from "lucide-react"
 
 interface QuizCreateFormProps {
@@ -41,6 +43,8 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [tags, setTags] = useState<string[]>([])
+  const [newTag, setNewTag] = useState("")
   const [showQuizSettings, setShowQuizSettings] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [currentPreviewQuestion, setCurrentPreviewQuestion] = useState(0)
@@ -49,6 +53,13 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
     randomizeQuestions: false,
     randomizeOptions: false,
   })
+
+  // Predefined tags for dropdown
+  const predefinedTags = [
+    "Science", "Math", "History", "Geography", "Literature", "Technology", 
+    "Sports", "Entertainment", "Business", "Health", "Art", "Music",
+    "Programming", "Education", "General Knowledge", "Fun", "Trivia"
+  ]
   const [questions, setQuestions] = useState<QuizQuestion[]>([
     {
       id: "1",
@@ -86,6 +97,32 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
       }
     }
   }, [])
+
+  const addTag = (tag: string) => {
+    if (tag.trim() && !tags.includes(tag.trim())) {
+      setTags([...tags, tag.trim()])
+    }
+    setNewTag("")
+  }
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove))
+  }
+
+  const handleAddNewTag = () => {
+    if (newTag.trim()) {
+      addTag(newTag)
+    }
+  }
+
+  const getTagColor = (tag: string) => {
+    const colors = [
+      "bg-blue-500", "bg-green-500", "bg-purple-500", "bg-red-500", 
+      "bg-yellow-500", "bg-pink-500", "bg-indigo-500", "bg-teal-500"
+    ]
+    const index = tag.length % colors.length
+    return colors[index]
+  }
 
   const addQuestion = () => {
     const newQuestion: QuizQuestion = {
@@ -369,6 +406,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
           image: undefined, // Remove images from initial creation
         })),
         userId: user.id,
+        tags,
         settings: quizSettings,
       }
 
@@ -404,6 +442,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
     const quizData = {
       title,
       description,
+      tags,
       settings: quizSettings,
       questions: questions.map((q) => ({
         type: q.type,
@@ -525,6 +564,71 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                   placeholder="Brief description of your quiz"
                   rows={3}
                 />
+              </div>
+              
+              {/* Tags Section */}
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <div className="space-y-3">
+                  {/* Add new tag input */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      placeholder="Add a new tag"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleAddNewTag()
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleAddNewTag}
+                      disabled={!newTag.trim()}
+                      size="sm"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  
+                  {/* Predefined tags dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button type="button" variant="outline" size="sm">
+                        Select from predefined tags
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {predefinedTags.map((tag) => (
+                        <DropdownMenuItem
+                          key={tag}
+                          onClick={() => addTag(tag)}
+                          disabled={tags.includes(tag)}
+                        >
+                          {tag}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  
+                  {/* Selected tags display */}
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className={`${getTagColor(tag)} cursor-pointer`}
+                          onClick={() => removeTag(tag)}
+                        >
+                          {tag} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {showQuizSettings && (

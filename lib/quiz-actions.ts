@@ -10,6 +10,7 @@ export async function createQuiz(data: {
   description: string
   questions: QuizQuestion[]
   userId: string
+  tags?: string[]
   settings: {
     showLeaderboard: boolean
     randomizeQuestions: boolean
@@ -27,6 +28,7 @@ export async function createQuiz(data: {
       published: false,
       participants: [],
       settings: data.settings,
+      tags: data.tags || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
@@ -42,6 +44,7 @@ export async function createQuiz(data: {
       published: false,
       participants: [],
       settings: data.settings,
+      tags: data.tags || [],
       createdAt: quizDoc.createdAt,
       updatedAt: quizDoc.updatedAt,
     }

@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Trash2, Plus, ArrowLeft, Save, Clock, Eye, Settings, Download, Copy } from "lucide-react"
 import { updateQuiz } from "@/lib/quiz-actions"
 import type { Quiz, QuizQuestion, User, QuestionType } from "@/lib/types"
@@ -27,11 +29,20 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
   const [description, setDescription] = useState(quiz.description)
   const [questions, setQuestions] = useState<QuizQuestion[]>(quiz.questions)
   const [quizSettings, setQuizSettings] = useState(quiz.settings)
+  const [tags, setTags] = useState<string[]>(quiz.tags || [])
+  const [newTag, setNewTag] = useState("")
   const [showQuizSettings, setShowQuizSettings] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [currentPreviewQuestion, setCurrentPreviewQuestion] = useState(0)
   const [showExportModal, setShowExportModal] = useState(false)
   const [exportJson, setExportJson] = useState('')
+
+  // Predefined tags for dropdown
+  const predefinedTags = [
+    "Science", "Math", "History", "Geography", "Literature", "Technology", 
+    "Sports", "Entertainment", "Business", "Health", "Art", "Music",
+    "Programming", "Education", "General Knowledge", "Fun", "Trivia"
+  ]
 
   const handleExportQuiz = () => {
     const exportData = {
@@ -45,12 +56,39 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
         settings: q.settings,
         ...(q.image && { image: q.image })
       })),
-      settings: quizSettings
+      settings: quizSettings,
+      tags
     }
     
     const jsonString = JSON.stringify(exportData, null, 2)
     setExportJson(jsonString)
     setShowExportModal(true)
+  }
+
+  const addTag = (tag: string) => {
+    if (tag.trim() && !tags.includes(tag.trim())) {
+      setTags([...tags, tag.trim()])
+    }
+    setNewTag("")
+  }
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove))
+  }
+
+  const handleAddNewTag = () => {
+    if (newTag.trim()) {
+      addTag(newTag)
+    }
+  }
+
+  const getTagColor = (tag: string) => {
+    const colors = [
+      "bg-blue-500", "bg-green-500", "bg-purple-500", "bg-red-500", 
+      "bg-yellow-500", "bg-pink-500", "bg-indigo-500", "bg-teal-500"
+    ]
+    const index = tag.length % colors.length
+    return colors[index]
   }
 
   const copyToClipboard = async () => {
@@ -253,6 +291,7 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
         description: description.trim(),
         questions,
         settings: quizSettings,
+        tags,
       })
 
       if (updatedQuiz) {
@@ -311,6 +350,60 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
                 placeholder="Enter quiz description"
                 rows={3}
               />
+            </div>
+            <div>
+              <Label htmlFor="tags">Tags</Label>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    id="tags"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add a new tag"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleAddNewTag()
+                      }
+                    }}
+                  />
+                  <Button type="button" onClick={handleAddNewTag} variant="outline" size="sm">
+                    Add
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button type="button" variant="outline" size="sm">
+                        Select Tag
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {predefinedTags
+                        .filter(tag => !tags.includes(tag))
+                        .map((tag) => (
+                          <DropdownMenuItem key={tag} onClick={() => addTag(tag)}>
+                            {tag}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        className={`${getTagColor(tag)} text-white hover:opacity-80 cursor-pointer`}
+                        onClick={() => removeTag(tag)}
+                      >
+                        {tag} ×
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-gray-500">
+                  Click on a tag to remove it. Press Enter or click Add to add a new tag.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

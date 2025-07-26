@@ -47,6 +47,7 @@ export function quizDocumentToQuiz(doc: QuizDocument): Quiz {
     published: doc.published,
     participants: doc.participants || [],
     settings: doc.settings,
+    tags: doc.tags || [],
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   }
@@ -61,6 +62,7 @@ export function quizToQuizDocument(quiz: Omit<Quiz, "id"> & { userId: string }):
     published: quiz.published,
     participants: quiz.participants || [],
     settings: quiz.settings,
+    tags: quiz.tags || [],
     createdAt: quiz.createdAt,
     updatedAt: quiz.updatedAt,
   }

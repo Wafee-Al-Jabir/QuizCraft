@@ -39,6 +39,7 @@ export interface Quiz {
   userId: string
   published: boolean
   participants: QuizParticipant[]
+  tags?: string[]
   settings: {
     showLeaderboard: boolean
     randomizeQuestions: boolean

@@ -8,8 +8,9 @@ import { AnimatedCard, StaggeredContainer } from "@/components/ui/micro-interact
 import { motion } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { SimpleThemeToggle } from "@/components/ui/theme-toggle"
-import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle, UserPlus, Trophy, Upload, Download, Copy } from "lucide-react"
+import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle, UserPlus, Trophy, Upload, Download, Copy, ChevronDown } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Textarea } from "@/components/ui/textarea"
 import { signOut } from "@/lib/auth-actions"
 import { getQuizzes, getQuizStats, publishQuiz, deleteQuiz } from "@/lib/quiz-actions"
@@ -28,8 +29,11 @@ interface DashboardContentProps {
   user: User
 }
 
+type SortOption = 'alphabetical' | 'published' | 'date'
+
 export function DashboardContent({ user }: DashboardContentProps) {
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
+  const [sortBy, setSortBy] = useState<SortOption>('date')
   const [stats, setStats] = useState<QuizStats>({
     totalQuizzes: 0,
     publishedQuizzes: 0,
@@ -167,7 +171,30 @@ export function DashboardContent({ user }: DashboardContentProps) {
     }
   }
 
+  // Sort quizzes based on selected option
+  const sortedQuizzes = [...quizzes].sort((a, b) => {
+    switch (sortBy) {
+      case 'alphabetical':
+        return a.title.localeCompare(b.title)
+      case 'published':
+        if (a.published === b.published) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        }
+        return a.published ? -1 : 1
+      case 'date':
+      default:
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    }
+  })
 
+  const getSortLabel = (option: SortOption) => {
+    switch (option) {
+      case 'alphabetical': return 'Alphabetical'
+      case 'published': return 'Published/Unpublished'
+      case 'date': return 'Date Created'
+      default: return 'Date Created'
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-background dark:to-background/95 transition-all duration-300">
@@ -330,13 +357,35 @@ export function DashboardContent({ user }: DashboardContentProps) {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <h2 className="hidden sm:block text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">Your Quizzes</h2>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <Link href="/quiz/join" className="w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-auto bg-gradient-to-r from-gray-50 to-white dark:from-card dark:to-card/80 border-2 border-gray-200 dark:border-border hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg transition-all duration-150 hover:scale-105">
-                <UserPlus className="h-4 w-4 mr-2 text-indigo-600 dark:text-indigo-400" />
-                <span className="hidden sm:inline font-medium">Join Quiz</span>
-                <span className="sm:hidden font-medium">Join</span>
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link href="/quiz/join" className="w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto bg-gradient-to-r from-gray-50 to-white dark:from-card dark:to-card/80 border-2 border-gray-200 dark:border-border hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg transition-all duration-150 hover:scale-105">
+                  <UserPlus className="h-4 w-4 mr-2 text-indigo-600 dark:text-indigo-400" />
+                  <span className="hidden sm:inline font-medium">Join Quiz</span>
+                  <span className="sm:hidden font-medium">Join</span>
+                </Button>
+              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="bg-gradient-to-r from-gray-50 to-white dark:from-card dark:to-card/80 border-2 border-gray-200 dark:border-border hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-150">
+                    <span className="hidden sm:inline font-medium">Sort: {getSortLabel(sortBy)}</span>
+                    <span className="sm:inline hidden">Sort</span>
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={() => setSortBy('alphabetical')}>
+                    Alphabetical
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('published')}>
+                    Published/Unpublished
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('date')}>
+                    Date Created
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="w-full sm:w-auto bg-gradient-to-r from-gray-50 to-white dark:from-card dark:to-card/80 border-2 border-gray-200 dark:border-border hover:border-green-300 dark:hover:border-green-500 hover:shadow-lg transition-all duration-150 hover:scale-105">
@@ -408,13 +457,25 @@ export function DashboardContent({ user }: DashboardContentProps) {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {quizzes.map((quiz) => (
+            {sortedQuizzes.map((quiz) => (
               <Card key={quiz.id}>
                 <CardHeader>
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div className="flex-1">
                       <CardTitle className="text-lg sm:text-xl">{quiz.title}</CardTitle>
                       <CardDescription className="text-sm sm:text-base">{quiz.description}</CardDescription>
+                      {quiz.tags && quiz.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {quiz.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex flex-col sm:flex-row lg:flex-row items-start sm:items-center gap-2 sm:gap-2">
                       <div className="flex items-center gap-2">
