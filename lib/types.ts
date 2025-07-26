@@ -119,7 +119,7 @@ export interface Badge {
     value: number
     condition?: string
   }
-  rarity: "common" | "rare" | "epic" | "legendary"
+  rarity: "common" | "rare" | "epic" | "legendary" | "ultimate"
   unlockedAt?: string
 }
 

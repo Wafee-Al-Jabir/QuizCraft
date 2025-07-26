@@ -176,6 +176,87 @@ const AVAILABLE_BADGES: Badge[] = [
     color: "from-gradient-to-r from-yellow-400 via-red-500 to-pink-500",
     type: "achievement",
     requirement: { type: "first_place_count", value: 50 }
+  },
+  // Ultimate badges - The highest tier achievements
+  {
+    id: "quiz-god",
+    name: "Quiz God",
+    description: "Create 100 quizzes - The ultimate creator",
+    icon: "award",
+    rarity: "ultimate",
+    color: "from-red-500 to-red-700",
+    type: "achievement",
+    requirement: { type: "quiz_count", value: 100 }
+  },
+  {
+    id: "question-architect",
+    name: "Question Architect",
+    description: "Write 1000 questions - Master of knowledge",
+    icon: "zap",
+    rarity: "ultimate",
+    color: "from-red-600 to-red-800",
+    type: "achievement",
+    requirement: { type: "question_count", value: 1000 }
+  },
+  {
+    id: "global-phenomenon",
+    name: "Global Phenomenon",
+    description: "Reach 10,000 total participants across all quizzes",
+    icon: "globe",
+    rarity: "ultimate",
+    color: "from-red-400 to-red-600",
+    type: "achievement",
+    requirement: { type: "participant_count", value: 10000 }
+  },
+  {
+    id: "perfectionist-supreme",
+    name: "Perfectionist Supreme",
+    description: "Maintain 100% average score with 50+ participants",
+    icon: "target",
+    rarity: "ultimate",
+    color: "from-red-500 to-red-700",
+    type: "achievement",
+    requirement: { type: "perfect_score", value: 100 }
+  },
+  {
+    id: "ultimate-champion-supreme",
+    name: "Ultimate Champion Supreme",
+    description: "Win 1st place 100 times - Unbeatable",
+    icon: "trophy",
+    rarity: "ultimate",
+    color: "from-red-600 to-red-800",
+    type: "achievement",
+    requirement: { type: "first_place_count", value: 100 }
+  },
+  {
+    id: "speed-legend",
+    name: "Speed Legend",
+    description: "Win 1st place with fastest time 25 times",
+    icon: "zap",
+    rarity: "ultimate",
+    color: "from-red-400 to-red-600",
+    type: "achievement",
+    requirement: { type: "speed_first_place", value: 25 }
+  },
+  {
+    id: "perfect-dominator",
+    name: "Perfect Dominator",
+    description: "Win 1st place with perfect score 50 times",
+    icon: "star",
+    rarity: "ultimate",
+    color: "from-red-500 to-red-700",
+    type: "achievement",
+    requirement: { type: "perfect_first_place", value: 50 }
+  },
+  {
+    id: "unstoppable-force",
+    name: "Unstoppable Force",
+    description: "Maintain a 50-win streak - Truly unstoppable",
+    icon: "award",
+    rarity: "ultimate",
+    color: "from-red-600 to-red-800",
+    type: "achievement",
+    requirement: { type: "first_place_streak", value: 50 }
   }
 ]
 
@@ -199,6 +280,7 @@ function getRarityColor(rarity: string) {
     case 'rare': return 'border-blue-300 bg-blue-100 text-blue-900 dark:border-blue-600 dark:bg-blue-900 dark:text-white'
     case 'epic': return 'border-purple-300 bg-purple-100 text-purple-900 dark:border-purple-600 dark:bg-purple-900 dark:text-white'
     case 'legendary': return 'border-yellow-300 bg-yellow-100 text-yellow-900 dark:border-yellow-600 dark:bg-yellow-900 dark:text-white'
+    case 'ultimate': return 'border-red-300 bg-red-100 text-red-900 dark:border-red-600 dark:bg-red-900 dark:text-white'
     default: return 'border-gray-300 bg-gray-100 text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white'
   }
 }
@@ -274,8 +356,8 @@ export default async function BadgesPage() {
   const inProgressBadges = badgesWithProgress.filter(badge => !badge.isUnlocked && badge.progress > 0)
   const lockedBadges = badgesWithProgress.filter(badge => !badge.isUnlocked && badge.progress === 0)
 
-  // Sort badges by rarity order: common -> rare -> epic -> legendary
-  const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4 }
+  // Sort badges by rarity order: common -> rare -> epic -> legendary -> ultimate
+  const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4, ultimate: 5 }
   const sortedBadges = badgesWithProgress.sort((a, b) => {
     return rarityOrder[a.rarity as keyof typeof rarityOrder] - rarityOrder[b.rarity as keyof typeof rarityOrder]
   })
@@ -403,6 +485,7 @@ export default async function BadgesPage() {
                             <BadgeUI 
                               variant={badge.isUnlocked ? "default" : "secondary"} 
                               className={`text-xs border ${
+                                badge.rarity === 'ultimate' ? 'bg-red-600 border-red-500 text-white' :
                                 badge.rarity === 'legendary' ? 'bg-yellow-600 border-yellow-500 text-white' :
                                 badge.rarity === 'epic' ? 'bg-purple-600 border-purple-500 text-white' :
                                 badge.rarity === 'rare' ? 'bg-blue-600 border-blue-500 text-white' :

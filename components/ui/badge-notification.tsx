@@ -38,6 +38,8 @@ function getRarityColor(rarity: string) {
       return 'from-purple-400 to-purple-600'
     case 'legendary':
       return 'from-yellow-400 to-yellow-600'
+    case 'ultimate':
+      return 'from-red-400 to-red-600'
     default:
       return 'from-gray-400 to-gray-600'
   }
@@ -53,6 +55,8 @@ function getRarityGlow(rarity: string) {
       return 'shadow-purple-500/40'
     case 'legendary':
       return 'shadow-yellow-500/50'
+    case 'ultimate':
+      return 'shadow-red-500/60'
     default:
       return 'shadow-gray-500/20'
   }
@@ -96,16 +100,34 @@ export function BadgeNotification({ badge, onClose }: BadgeNotificationProps) {
           <motion.div
             className="absolute -top-1 -right-1"
             animate={{
-              scale: [0, 1, 0],
+              scale: [1, 1.2, 1],
               rotate: [0, 180, 360]
             }}
             transition={{
-              duration: 1.5,
+              duration: 3,
               repeat: Infinity,
               ease: "easeInOut"
             }}
           >
-            <Star className="h-3 w-3 text-yellow-300" fill="currentColor" />
+            <Star className="h-3 w-3 text-yellow-300 fill-yellow-300" />
+          </motion.div>
+        )}
+        
+        {/* Fire Effect for Ultimate */}
+        {badge.rarity === 'ultimate' && (
+          <motion.div
+            className="absolute -top-1 -right-1"
+            animate={{
+              scale: [1, 1.3, 1],
+              rotate: [0, -10, 10, 0]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <div className="h-3 w-3 bg-red-500 rounded-full animate-pulse" />
           </motion.div>
         )}
       </motion.div>
