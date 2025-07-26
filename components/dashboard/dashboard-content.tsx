@@ -196,6 +196,20 @@ export function DashboardContent({ user }: DashboardContentProps) {
     }
   }
 
+  const getTagColor = (tag: string) => {
+    const colorMap: { [key: string]: string } = {
+      'a': 'bg-red-500', 'b': 'bg-blue-500', 'c': 'bg-green-500', 'd': 'bg-yellow-500',
+      'e': 'bg-purple-500', 'f': 'bg-pink-500', 'g': 'bg-indigo-500', 'h': 'bg-teal-500',
+      'i': 'bg-orange-500', 'j': 'bg-cyan-500', 'k': 'bg-lime-500', 'l': 'bg-amber-500',
+      'm': 'bg-emerald-500', 'n': 'bg-violet-500', 'o': 'bg-rose-500', 'p': 'bg-sky-500',
+      'q': 'bg-fuchsia-500', 'r': 'bg-slate-500', 's': 'bg-zinc-500', 't': 'bg-neutral-500',
+      'u': 'bg-stone-500', 'v': 'bg-red-600', 'w': 'bg-blue-600', 'x': 'bg-green-600',
+      'y': 'bg-yellow-600', 'z': 'bg-purple-600'
+    }
+    const firstLetter = tag.toLowerCase().charAt(0)
+    return colorMap[firstLetter] || 'bg-gray-500'
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-background dark:to-background/95 transition-all duration-300">
       {/* Header */}
@@ -368,8 +382,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="bg-gradient-to-r from-gray-50 to-white dark:from-card dark:to-card/80 border-2 border-gray-200 dark:border-border hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-150">
-                    <span className="hidden sm:inline font-medium">Sort: {getSortLabel(sortBy)}</span>
-                    <span className="sm:inline hidden">Sort</span>
+                    <span className="hidden sm:inline font-medium">Order: {getSortLabel(sortBy)}</span> 
                     <ChevronDown className="h-4 w-4 ml-2" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -469,7 +482,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
                           {quiz.tags.map((tag, index) => (
                             <span
                               key={index}
-                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white ${getTagColor(tag)}`}
                             >
                               {tag}
                             </span>

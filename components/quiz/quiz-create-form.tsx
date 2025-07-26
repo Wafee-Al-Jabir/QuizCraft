@@ -116,12 +116,17 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
   }
 
   const getTagColor = (tag: string) => {
-    const colors = [
-      "bg-blue-500", "bg-green-500", "bg-purple-500", "bg-red-500", 
-      "bg-yellow-500", "bg-pink-500", "bg-indigo-500", "bg-teal-500"
-    ]
-    const index = tag.length % colors.length
-    return colors[index]
+    const colorMap: { [key: string]: string } = {
+      'a': 'bg-red-500', 'b': 'bg-blue-500', 'c': 'bg-green-500', 'd': 'bg-yellow-500',
+      'e': 'bg-purple-500', 'f': 'bg-pink-500', 'g': 'bg-indigo-500', 'h': 'bg-teal-500',
+      'i': 'bg-orange-500', 'j': 'bg-cyan-500', 'k': 'bg-lime-500', 'l': 'bg-amber-500',
+      'm': 'bg-emerald-500', 'n': 'bg-violet-500', 'o': 'bg-rose-500', 'p': 'bg-sky-500',
+      'q': 'bg-fuchsia-500', 'r': 'bg-slate-500', 's': 'bg-zinc-500', 't': 'bg-neutral-500',
+      'u': 'bg-stone-500', 'v': 'bg-red-600', 'w': 'bg-blue-600', 'x': 'bg-green-600',
+      'y': 'bg-yellow-600', 'z': 'bg-purple-600'
+    }
+    const firstLetter = tag.toLowerCase().charAt(0)
+    return colorMap[firstLetter] || 'bg-gray-500'
   }
 
   const addQuestion = () => {
