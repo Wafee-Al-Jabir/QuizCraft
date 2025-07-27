@@ -36,7 +36,12 @@ app.prepare().then(() => {
   const quizSessions = new Map()
 
   io.on('connection', (socket) => {
-    console.log('Client connected:', socket.id)
+    console.log('🟢 Client connected:', socket.id)
+    
+    // Debug: Log all incoming events
+    socket.onAny((eventName, ...args) => {
+      console.log('📨 Socket event received:', eventName, 'from:', socket.id, 'data:', args)
+    })
 
     // Host creates a quiz session
     socket.on('host-quiz', (data) => {
@@ -64,8 +69,10 @@ app.prepare().then(() => {
 
     // Participant joins quiz
     socket.on('join-quiz', (data) => {
+      console.log('🔵 join-quiz event received:', data)
       const { sessionCode, participantName } = data
       const session = quizSessions.get(sessionCode)
+      console.log('🔍 Session lookup result:', session ? 'Found' : 'Not found', 'for code:', sessionCode)
       
       if (!session) {
         socket.emit('join-error', { message: 'Quiz session not found' })
@@ -89,11 +96,17 @@ app.prepare().then(() => {
       const joinResponse = { 
         sessionCode, 
         participantId, 
-        quiz: {
+        quizInfo: {
           title: session.quiz.title,
           description: session.quiz.description,
-          questionCount: session.quiz.questions.length
-        }
+          totalQuestions: session.quiz.questions.length,
+          timePerQuestion: 30
+        },
+        participants: Array.from(session.participants.values()).map(p => ({
+          id: p.id,
+          name: p.name,
+          score: p.score
+        }))
       }
       
       // If quiz is active, send current question immediately
