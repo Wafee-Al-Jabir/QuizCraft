@@ -261,7 +261,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
     if (currentQuestion.question.type === 'single-choice') {
       setSelectedAnswer(optionIndex!)
     } else if (currentQuestion.question.type === 'multiple-choice') {
-      const currentAnswers = selectedAnswer as number[]
+      const currentAnswers = Array.isArray(selectedAnswer) ? selectedAnswer : []
       if (value) {
         setSelectedAnswer([...currentAnswers, optionIndex!])
       } else {
@@ -547,7 +547,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                     <div key={index} className="flex items-start space-x-2 sm:space-x-3">
                       <Checkbox 
                         id={`option-${index}`}
-                        checked={(selectedAnswer as number[]).includes(index)}
+                        checked={Array.isArray(selectedAnswer) && selectedAnswer.includes(index)}
                         onCheckedChange={(checked) => handleAnswerChange(checked, index)}
                         disabled={isAnswered}
                         className="mt-[10px]"
@@ -572,7 +572,7 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
                   onClick={submitAnswer}
                   disabled={isAnswered || timeLeft === 0 || 
                     (currentQuestion.question.type === 'single-choice' && selectedAnswer === 0 && !currentQuestion.question.options[0]) ||
-                    (currentQuestion.question.type === 'multiple-choice' && (selectedAnswer as number[]).length === 0)
+                    (currentQuestion.question.type === 'multiple-choice' && (!Array.isArray(selectedAnswer) || selectedAnswer.length === 0))
                   }
                   className="w-full sm:w-auto"
                 >
