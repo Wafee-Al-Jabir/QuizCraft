@@ -69,7 +69,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
   const [participants, setParticipants] = useState<Participant[]>([])
 
   useEffect(() => {
-    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001')
+    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000')
     setSocket(newSocket)
 
     newSocket.on('connect', () => {
@@ -216,7 +216,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
     if (currentQuestion.question.type === 'single-choice') {
       setSelectedAnswer(optionIndex!)
     } else if (currentQuestion.question.type === 'multiple-choice') {
-      const currentAnswers = selectedAnswer as number[]
+      const currentAnswers = Array.isArray(selectedAnswer) ? selectedAnswer : []
       if (value) {
         setSelectedAnswer([...currentAnswers, optionIndex!])
       } else {
@@ -457,7 +457,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
                         variant={
                           currentQuestion.question.type === 'single-choice'
                             ? selectedAnswer === index ? "default" : "outline"
-                            : (selectedAnswer as number[]).includes(index) ? "default" : "outline"
+                            : (Array.isArray(selectedAnswer) && selectedAnswer.includes(index)) ? "default" : "outline"
                         }
                         className="w-full justify-start"
                         onClick={() => handleAnswerChange(true, index)}
@@ -474,7 +474,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
                     onClick={submitAnswer} 
                     disabled={timeLeft === 0 || (
                       currentQuestion.question.type === 'multiple-choice' 
-                        ? (selectedAnswer as number[]).length === 0
+                        ? (!Array.isArray(selectedAnswer) || selectedAnswer.length === 0)
                         : selectedAnswer === undefined
                     )}
                     className="w-full"

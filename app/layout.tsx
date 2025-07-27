@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { SocketProvider } from "@/lib/socket-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { ErrorFooter } from "@/components/ui/error-footer"
 
 export const metadata: Metadata = {
   title: "QuizCraft",
@@ -42,7 +43,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SocketProvider>
-            {children}
+            <div className="flex flex-col min-h-screen">
+              <div className="flex-1">
+                {children}
+              </div>
+              <ErrorFooter />
+            </div>
           </SocketProvider>
         </ThemeProvider>
       </body>

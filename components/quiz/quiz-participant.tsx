@@ -211,10 +211,8 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
   const verifyCode = () => {
     if (!sessionCode.trim()) return
     
-    // For now, just move to name step
-    // In a real implementation, you might want to verify the code exists first
-    setJoinStep('name')
-    setError('')
+    // Redirect to the dynamic route with the session code
+    window.location.href = `/quiz/join/${sessionCode.toUpperCase()}`
   }
 
   const joinQuiz = () => {
