@@ -67,6 +67,16 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
   const [pollResponse, setPollResponse] = useState<string>('')
   const [hasPollResponded, setHasPollResponded] = useState(false)
   const [pollResults, setPollResults] = useState<{question: string, results: {[key: string]: number}} | null>(null)
+  const [connectionAttempted, setConnectionAttempted] = useState(false)
+
+  // Give socket time to connect before showing connecting screen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setConnectionAttempted(true)
+    }, 2000) // Wait 2 seconds before showing connecting screen
+
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     if (!socket || !isConnected) return
@@ -285,13 +295,37 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
     onClose()
   }
 
-  if (!isConnected) {
+  // Show connecting screen if not connected and connection has been attempted
+  if (!isConnected && connectionAttempted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
-          <CardContent className="text-center py-8">
-            <div className="text-lg font-medium text-gray-900 mb-2">Connecting...</div>
-            <div className="text-sm text-gray-600">Please wait while we establish connection</div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+            <h2 className="text-xl font-semibold text-center mb-2">Connecting...</h2>
+            <p className="text-gray-400 text-center">Establishing connection to the quiz server</p>
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              className="mt-4"
+            >
+              Cancel
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show loading screen during initial connection attempt
+  if (!connectionAttempted) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <div className="animate-pulse rounded-full h-12 w-12 bg-white/20 mb-4"></div>
+            <h2 className="text-xl font-semibold text-center mb-2">Loading...</h2>
+            <p className="text-gray-400 text-center">Initializing quiz system</p>
           </CardContent>
         </Card>
       </div>

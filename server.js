@@ -29,7 +29,17 @@ app.prepare().then(() => {
     cors: {
       origin: process.env.NODE_ENV === 'production' ? false : true,
       methods: ['GET', 'POST']
-    }
+    },
+    connectionStateRecovery: {
+      // the backup duration of the sessions and the packets
+      maxDisconnectionDuration: 15 * 60 * 1000,
+      // whether to skip middlewares upon successful recovery
+      skipMiddlewares: true,
+    },
+    // transports: ['websocket'], // Force websocket only
+    // allowEIO3: true,
+    // pingTimeout: 60000,
+    // pingInterval: 25000
   })
 
   // Store active quiz sessions

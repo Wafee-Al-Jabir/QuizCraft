@@ -1,6 +1,6 @@
 {
   "name": "QuizCraft",
-  "version": "0.1.0",
+  "version": "1.5.1",
   "private": true,
   "engines": {
     "node": ">=18.0.0",
@@ -12,7 +12,7 @@
     "build:win": "build.bat",
     "build:deploy": "npm exec next build",
     "build:test": "node scripts/test-build.js",
-    "dev": "node server.js",
+    "dev": "nodemon server.js",
     "dev:next": "npm exec next dev",
     "lint": "npm exec next lint",
     "start": "set NODE_ENV=production && node server.js"
@@ -67,6 +67,7 @@
     "mongodb-client-encryption": "latest",
     "next": "^14.2.30",
     "next-themes": "^0.4.4",
+    "nodemon": "^3.1.10",
     "npx": "^10.2.2",
     "nvm": "^0.0.4",
     "qrcode": "^1.5.4",

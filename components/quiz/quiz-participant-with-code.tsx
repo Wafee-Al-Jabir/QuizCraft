@@ -69,7 +69,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
   const [participants, setParticipants] = useState<Participant[]>([])
 
   useEffect(() => {
-    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000')
+    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin)
     setSocket(newSocket)
 
     newSocket.on('connect', () => {
@@ -97,8 +97,12 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
       setIsJoining(false)
     })
 
-    newSocket.on('quiz-started', () => {
-      console.log('Quiz started')
+    newSocket.on('quiz-started', (data) => {
+      console.log('Quiz started - received question data:', data);
+      setCurrentQuestion(data);
+      setTimeLeft(data.question.timeLimit);
+      setIsAnswered(false);
+      setSelectedAnswer(data.question.type === 'multiple-choice' ? [] : 0);
     })
 
     newSocket.on('next-question', (data: CurrentQuestion) => {
