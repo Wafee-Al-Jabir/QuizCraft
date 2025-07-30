@@ -438,7 +438,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
                   <div className="space-y-2">
                     <Button
                       variant={selectedAnswer === 0 ? "default" : "outline"}
-                      className="w-full justify-start"
+                      className="w-full justify-start whitespace-normal break-words"
                       onClick={() => handleAnswerChange(true, 0)}
                       disabled={isAnswered}
                     >
@@ -446,7 +446,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
                     </Button>
                     <Button
                       variant={selectedAnswer === 1 ? "default" : "outline"}
-                      className="w-full justify-start"
+                      className="w-full justify-start whitespace-normal break-words"
                       onClick={() => handleAnswerChange(true, 1)}
                       disabled={isAnswered}
                     >
@@ -457,18 +457,18 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
                   <div className="space-y-2">
                     {currentQuestion.question.options?.map((option, index) => (
                       <Button
-                        key={index}
-                        variant={
-                          currentQuestion.question.type === 'single-choice'
-                            ? selectedAnswer === index ? "default" : "outline"
-                            : (Array.isArray(selectedAnswer) && selectedAnswer.includes(index)) ? "default" : "outline"
-                        }
-                        className="w-full justify-start"
-                        onClick={() => handleAnswerChange(!Array.isArray(selectedAnswer) || !selectedAnswer.includes(index), index)}
-                        disabled={isAnswered}
-                      >
-                        {option}
-                      </Button>
+                      key={index}
+                      variant={
+                        currentQuestion.question.type === 'single-choice'
+                          ? selectedAnswer === index ? "default" : "outline"
+                          : (Array.isArray(selectedAnswer) && selectedAnswer.includes(index)) ? "default" : "outline"
+                      }
+                      className="w-full justify-start whitespace-normal break-words"
+                      onClick={() => handleAnswerChange(!Array.isArray(selectedAnswer) || !selectedAnswer.includes(index), index)}
+                      disabled={isAnswered}
+                    >
+                      {option}
+                    </Button>
                     ))}
                   </div>
                 )}
