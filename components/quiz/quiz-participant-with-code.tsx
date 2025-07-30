@@ -57,7 +57,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
   const [error, setError] = useState('')
   const [quizInfo, setQuizInfo] = useState<QuizInfo | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState<CurrentQuestion | null>(null)
-  const [selectedAnswer, setSelectedAnswer] = useState<number | number[]>([])
+  const [selectedAnswer, setSelectedAnswer] = useState<number | number[] | undefined>(undefined)
   const [timeLeft, setTimeLeft] = useState(0)
   const [score, setScore] = useState(0)
   const [isAnswered, setIsAnswered] = useState(false)
@@ -102,13 +102,13 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
       setCurrentQuestion(data);
       setTimeLeft(data.question.timeLimit);
       setIsAnswered(false);
-      setSelectedAnswer(data.question.type === 'multiple-choice' ? [] : 0);
+      setSelectedAnswer(data.question.type === 'multiple-choice' ? [] : undefined);
     })
 
     newSocket.on('next-question', (data: CurrentQuestion) => {
       console.log('Next question:', data)
       setCurrentQuestion(data)
-      setSelectedAnswer(data.question.type === 'multiple-choice' ? [] : 0)
+      setSelectedAnswer(data.question.type === 'multiple-choice' ? [] : undefined)
       setTimeLeft(data.question.timeLimit || 30)
       setIsAnswered(false)
     })
@@ -217,7 +217,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
   const handleAnswerChange = (value: string | boolean, optionIndex?: number) => {
     if (!currentQuestion || isAnswered) return
 
-    if (currentQuestion.question.type === 'single-choice') {
+    if (currentQuestion.question.type === 'single-choice' || currentQuestion.question.type === 'true-false') {
       setSelectedAnswer(optionIndex!)
     } else if (currentQuestion.question.type === 'multiple-choice') {
       const currentAnswers = Array.isArray(selectedAnswer) ? selectedAnswer : []
@@ -464,7 +464,7 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
                             : (Array.isArray(selectedAnswer) && selectedAnswer.includes(index)) ? "default" : "outline"
                         }
                         className="w-full justify-start"
-                        onClick={() => handleAnswerChange(true, index)}
+                        onClick={() => handleAnswerChange(!Array.isArray(selectedAnswer) || !selectedAnswer.includes(index), index)}
                         disabled={isAnswered}
                       >
                         {option}

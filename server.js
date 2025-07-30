@@ -150,7 +150,7 @@ app.prepare().then(() => {
       }
       
       // Notify host and other participants
-      io.to(`quiz-${sessionCode}`).emit('participant-joined', {
+      socket.to(`quiz-${sessionCode}`).emit('participant-joined', {
         participant: {
           id: participant.id,
           name: participant.name,
