@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, Trophy, Clock, Users } from 'lucide-react'
+import { AlertCircle, Trophy, Clock, Users, CheckCircle, XCircle } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
 import { WaitingRoomGame } from './waiting-room-game'
 
@@ -48,6 +48,25 @@ interface Poll {
   options: string[]
 }
 
+interface MiniLeaderboard {
+  currentParticipant: {
+    name: string
+    score: number
+    rank: number
+    isCorrect: boolean
+  }
+  participantAbove: {
+    name: string
+    score: number
+    rank: number
+  } | null
+  participantBelow: {
+    name: string
+    score: number
+    rank: number
+  } | null
+}
+
 export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipantWithCodeProps) {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
@@ -67,6 +86,8 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
   const [pollResponse, setPollResponse] = useState('')
   const [hasPollResponded, setHasPollResponded] = useState(false)
   const [participants, setParticipants] = useState<Participant[]>([])
+  const [miniLeaderboard, setMiniLeaderboard] = useState<MiniLeaderboard | null>(null)
+  const [showMiniLeaderboard, setShowMiniLeaderboard] = useState(false)
 
   useEffect(() => {
     const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin)
@@ -152,6 +173,18 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
       setActivePoll(null)
       setPollResponse('')
       setHasPollResponded(false)
+    })
+
+    newSocket.on('question-results', (data: { miniLeaderboard: MiniLeaderboard }) => {
+      console.log('Question results received:', data)
+      setMiniLeaderboard(data.miniLeaderboard)
+      setShowMiniLeaderboard(true)
+      
+      // Hide mini-leaderboard after 5 seconds
+      setTimeout(() => {
+        setShowMiniLeaderboard(false)
+        setMiniLeaderboard(null)
+      }, 5000)
     })
 
     return () => {
@@ -409,103 +442,215 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
 
   if (currentQuestion) {
     return (
-      <div className="min-h-screen bg-black p-4">
-        <div className="max-w-2xl mx-auto">
-          <Card className="dark:bg-gray-800 dark:border-gray-700">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-xl">
-                    Question {currentQuestion.questionNumber} of {currentQuestion.totalQuestions}
-                  </CardTitle>
-                  <CardDescription>Score: {score} points</CardDescription>
+      <>
+        <div className="min-h-screen bg-black p-4">
+          <div className="max-w-2xl mx-auto">
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="text-xl">
+                      Question {currentQuestion.questionNumber} of {currentQuestion.totalQuestions}
+                    </CardTitle>
+                    <CardDescription>Score: {score} points</CardDescription>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4" />
+                    <span className={`font-bold ${
+                      timeLeft <= 5 ? 'text-red-500' : timeLeft <= 10 ? 'text-yellow-500' : 'text-green-500'
+                    }`}>
+                      {timeLeft}s
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4" />
-                  <span className={`font-bold ${
-                    timeLeft <= 5 ? 'text-red-500' : timeLeft <= 10 ? 'text-yellow-500' : 'text-green-500'
-                  }`}>
-                    {timeLeft}s
-                  </span>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <h2 className="text-lg font-medium">{currentQuestion.question.question}</h2>
+                  
+                  {currentQuestion.question.type === 'true-false' ? (
+                    <div className="space-y-2">
+                      <Button
+                        variant={selectedAnswer === 0 ? "default" : "outline"}
+                        className="w-full justify-start whitespace-normal break-words"
+                        onClick={() => handleAnswerChange(true, 0)}
+                        disabled={isAnswered}
+                      >
+                        True
+                      </Button>
+                      <Button
+                        variant={selectedAnswer === 1 ? "default" : "outline"}
+                        className="w-full justify-start whitespace-normal break-words"
+                        onClick={() => handleAnswerChange(true, 1)}
+                        disabled={isAnswered}
+                      >
+                        False
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {currentQuestion.question.options?.map((option, index) => (
+                        <Button
+                        key={index}
+                        variant={
+                          currentQuestion.question.type === 'single-choice'
+                            ? selectedAnswer === index ? "default" : "outline"
+                            : (Array.isArray(selectedAnswer) && selectedAnswer.includes(index)) ? "default" : "outline"
+                        }
+                        className="w-full justify-start whitespace-normal break-words"
+                        onClick={() => handleAnswerChange(!Array.isArray(selectedAnswer) || !selectedAnswer.includes(index), index)}
+                        disabled={isAnswered}
+                      >
+                        {option}
+                      </Button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {!isAnswered && (
+                    <Button 
+                      onClick={submitAnswer} 
+                      disabled={timeLeft === 0 || (
+                        currentQuestion.question.type === 'multiple-choice' 
+                          ? (!Array.isArray(selectedAnswer) || selectedAnswer.length === 0)
+                          : selectedAnswer === undefined
+                      )}
+                      className="w-full"
+                    >
+                      Submit Answer
+                    </Button>
+                  )}
+                  
+                  {isAnswered && (
+                    <div className="text-center text-green-600">
+                      Answer submitted! Waiting for next question...
+                    </div>
+                  )}
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        
+        {/* Mini-leaderboard overlay */}
+        {showMiniLeaderboard && miniLeaderboard && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md mx-4 dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  {miniLeaderboard.currentParticipant.isCorrect ? (
+                    <CheckCircle className="h-16 w-16 text-green-500" />
+                  ) : (
+                    <XCircle className="h-16 w-16 text-red-500" />
+                  )}
+                </div>
+                <CardTitle className="text-2xl">
+                  {miniLeaderboard.currentParticipant.isCorrect ? 'Correct!' : 'Incorrect'}
+                </CardTitle>
+                <CardDescription className="text-lg">
+                  You are in {miniLeaderboard.currentParticipant.rank}{miniLeaderboard.currentParticipant.rank === 1 ? 'st' : miniLeaderboard.currentParticipant.rank === 2 ? 'nd' : miniLeaderboard.currentParticipant.rank === 3 ? 'rd' : 'th'} place
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {miniLeaderboard.participantAbove && (
+                    <div className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-700 rounded">
+                      <div>
+                        <div className="font-medium">{miniLeaderboard.participantAbove.name}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">#{miniLeaderboard.participantAbove.rank}</div>
+                      </div>
+                      <Badge variant="secondary">{miniLeaderboard.participantAbove.score} pts</Badge>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center p-3 bg-blue-100 dark:bg-blue-900 rounded border-2 border-blue-500">
+                    <div>
+                      <div className="font-bold">{miniLeaderboard.currentParticipant.name} (You)</div>
+                      <div className="text-sm text-blue-600 dark:text-blue-400">#{miniLeaderboard.currentParticipant.rank}</div>
+                    </div>
+                    <Badge className="bg-blue-500">{miniLeaderboard.currentParticipant.score} pts</Badge>
+                  </div>
+                  
+                  {miniLeaderboard.participantBelow && (
+                    <div className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-700 rounded">
+                      <div>
+                        <div className="font-medium">{miniLeaderboard.participantBelow.name}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">#{miniLeaderboard.participantBelow.rank}</div>
+                      </div>
+                      <Badge variant="secondary">{miniLeaderboard.participantBelow.score} pts</Badge>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </>
+    )
+  }
+
+  // Waiting room
+  return (
+    <>
+      <WaitingRoomGame 
+        participants={participants}
+        participantName={participantName}
+        quizInfo={quizInfo}
+      />
+      
+      {/* Mini-leaderboard overlay */}
+      {showMiniLeaderboard && miniLeaderboard && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4 dark:bg-gray-800 dark:border-gray-700">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                {miniLeaderboard.currentParticipant.isCorrect ? (
+                  <CheckCircle className="h-16 w-16 text-green-500" />
+                ) : (
+                  <XCircle className="h-16 w-16 text-red-500" />
+                )}
               </div>
+              <CardTitle className="text-2xl">
+                {miniLeaderboard.currentParticipant.isCorrect ? 'Correct!' : 'Incorrect'}
+              </CardTitle>
+              <CardDescription className="text-lg">
+                You are in {miniLeaderboard.currentParticipant.rank}{miniLeaderboard.currentParticipant.rank === 1 ? 'st' : miniLeaderboard.currentParticipant.rank === 2 ? 'nd' : miniLeaderboard.currentParticipant.rank === 3 ? 'rd' : 'th'} place
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <h2 className="text-lg font-medium">{currentQuestion.question.question}</h2>
-                
-                {currentQuestion.question.type === 'true-false' ? (
-                  <div className="space-y-2">
-                    <Button
-                      variant={selectedAnswer === 0 ? "default" : "outline"}
-                      className="w-full justify-start whitespace-normal break-words"
-                      onClick={() => handleAnswerChange(true, 0)}
-                      disabled={isAnswered}
-                    >
-                      True
-                    </Button>
-                    <Button
-                      variant={selectedAnswer === 1 ? "default" : "outline"}
-                      className="w-full justify-start whitespace-normal break-words"
-                      onClick={() => handleAnswerChange(true, 1)}
-                      disabled={isAnswered}
-                    >
-                      False
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {currentQuestion.question.options?.map((option, index) => (
-                      <Button
-                      key={index}
-                      variant={
-                        currentQuestion.question.type === 'single-choice'
-                          ? selectedAnswer === index ? "default" : "outline"
-                          : (Array.isArray(selectedAnswer) && selectedAnswer.includes(index)) ? "default" : "outline"
-                      }
-                      className="w-full justify-start whitespace-normal break-words"
-                      onClick={() => handleAnswerChange(!Array.isArray(selectedAnswer) || !selectedAnswer.includes(index), index)}
-                      disabled={isAnswered}
-                    >
-                      {option}
-                    </Button>
-                    ))}
+              <div className="space-y-3">
+                {miniLeaderboard.participantAbove && (
+                  <div className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-700 rounded">
+                    <div>
+                      <div className="font-medium">{miniLeaderboard.participantAbove.name}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">#{miniLeaderboard.participantAbove.rank}</div>
+                    </div>
+                    <Badge variant="secondary">{miniLeaderboard.participantAbove.score} pts</Badge>
                   </div>
                 )}
                 
-                {!isAnswered && (
-                  <Button 
-                    onClick={submitAnswer} 
-                    disabled={timeLeft === 0 || (
-                      currentQuestion.question.type === 'multiple-choice' 
-                        ? (!Array.isArray(selectedAnswer) || selectedAnswer.length === 0)
-                        : selectedAnswer === undefined
-                    )}
-                    className="w-full"
-                  >
-                    Submit Answer
-                  </Button>
-                )}
+                <div className="flex justify-between items-center p-3 bg-blue-100 dark:bg-blue-900 rounded border-2 border-blue-500">
+                  <div>
+                    <div className="font-bold">{miniLeaderboard.currentParticipant.name} (You)</div>
+                    <div className="text-sm text-blue-600 dark:text-blue-400">#{miniLeaderboard.currentParticipant.rank}</div>
+                  </div>
+                  <Badge className="bg-blue-500">{miniLeaderboard.currentParticipant.score} pts</Badge>
+                </div>
                 
-                {isAnswered && (
-                  <div className="text-center text-green-600">
-                    Answer submitted! Waiting for next question...
+                {miniLeaderboard.participantBelow && (
+                  <div className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-700 rounded">
+                    <div>
+                      <div className="font-medium">{miniLeaderboard.participantBelow.name}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">#{miniLeaderboard.participantBelow.rank}</div>
+                    </div>
+                    <Badge variant="secondary">{miniLeaderboard.participantBelow.score} pts</Badge>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
         </div>
-      </div>
-    )
-  }
-
-  // Waiting room
-  return (
-    <WaitingRoomGame 
-      participants={participants}
-      participantName={participantName}
-      quizInfo={quizInfo}
-    />
+      )}
+    </>
   )
 }

@@ -349,6 +349,68 @@ app.prepare().then(() => {
       }
     })
 
+    // Host shows question results (after answer time ends)
+    socket.on('show-question-results', (data) => {
+      const { sessionCode } = data
+      const session = quizSessions.get(sessionCode)
+      
+      if (!session || session.hostSocketId !== socket.id) {
+        socket.emit('error', { message: 'Unauthorized or session not found' })
+        return
+      }
+      
+      const currentQuestion = session.quiz.questions[session.currentQuestion]
+      
+      // Check if this question should show leaderboard after
+      if (currentQuestion?.settings?.showLeaderboardAfter) {
+        // Generate leaderboard with rankings
+        const sortedParticipants = Array.from(session.participants.values())
+          .sort((a, b) => b.score - a.score)
+        
+        // Send personalized mini-leaderboard to each participant
+        sortedParticipants.forEach((participant, index) => {
+          const rank = index + 1
+          const participantAbove = index > 0 ? sortedParticipants[index - 1] : null
+          const participantBelow = index < sortedParticipants.length - 1 ? sortedParticipants[index + 1] : null
+          
+          // Get the participant's answer for this question
+          const participantAnswer = participant.answers.find(a => a.questionId === currentQuestion.id)
+          const isCorrect = participantAnswer?.isCorrect || false
+          
+          const miniLeaderboard = {
+            currentParticipant: {
+              name: participant.name,
+              score: participant.score,
+              rank: rank,
+              isCorrect: isCorrect
+            },
+            participantAbove: participantAbove ? {
+              name: participantAbove.name,
+              score: participantAbove.score,
+              rank: index
+            } : null,
+            participantBelow: participantBelow ? {
+              name: participantBelow.name,
+              score: participantBelow.score,
+              rank: index + 2
+            } : null
+          }
+          
+          io.to(participant.socketId).emit('question-results', { miniLeaderboard })
+        })
+        
+        // Also send full leaderboard to host
+        const fullLeaderboard = sortedParticipants.map((p, index) => ({
+          id: p.id,
+          name: p.name,
+          score: p.score,
+          rank: index + 1
+        }))
+        
+        io.to(session.hostSocketId).emit('question-results', { leaderboard: fullLeaderboard })
+      }
+    })
+
     // Host starts a poll
     socket.on('start-poll', (data) => {
       const { sessionCode, poll } = data

@@ -179,6 +179,16 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
+          // Check if current question has showLeaderboardAfter enabled
+          const currentQuestionIndex = currentQuestion.questionNumber - 1
+          const questionSettings = quiz.questions[currentQuestionIndex]?.settings
+          if (questionSettings?.showLeaderboardAfter && socket) {
+            // Emit show-question-results event when timer reaches 0
+            socket.emit('show-question-results', { 
+              sessionCode, 
+              questionIndex: currentQuestionIndex 
+            })
+          }
           return 0
         }
         return prev - 1
@@ -186,7 +196,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [currentQuestion, isQuizActive])
+  }, [currentQuestion, isQuizActive, socket, sessionCode, quiz.questions])
 
   const startQuiz = () => {
     if (!socket || participants.length === 0) return
@@ -213,6 +223,19 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
 
   const nextQuestion = () => {
     if (!socket) return
+    
+    // Check if current question has showLeaderboardAfter enabled before moving to next
+    if (currentQuestion) {
+      const currentQuestionIndex = currentQuestion.questionNumber - 1
+      const questionSettings = quiz.questions[currentQuestionIndex]?.settings
+      if (questionSettings?.showLeaderboardAfter) {
+        // Emit show-question-results event before advancing
+        socket.emit('show-question-results', { 
+          sessionCode, 
+          questionIndex: currentQuestionIndex 
+        })
+      }
+    }
     
     socket.emit('next-question', { sessionCode })
     setAnsweredParticipants(new Set())
