@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Users, Play, SkipForward, Trophy, Clock, CheckCircle, BarChart3, MessageSquare, QrCode, Copy } from 'lucide-react'
+import { Users, Play, SkipForward, Trophy, Clock, CheckCircle, BarChart3, MessageSquare, QrCode, Copy, Crown } from 'lucide-react'
 import { useSocket } from '@/lib/socket-context'
 import { saveLiveSessionParticipants } from '@/lib/quiz-actions'
 import { SimpleThemeToggle } from '@/components/ui/theme-toggle'
@@ -65,6 +65,8 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
   const [activePoll, setActivePoll] = useState<{question: string, options: string[]} | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('')
+  const [showFullscreenLeaderboard, setShowFullscreenLeaderboard] = useState(false)
+  const [leaderboardCountdown, setLeaderboardCountdown] = useState(0)
 
   useEffect(() => {
     if (!socket || !isConnected) return
@@ -174,7 +176,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
 
   // Timer effect for host - continues running even after participants answer
   useEffect(() => {
-    if (!currentQuestion || !isQuizActive) return
+    if (!currentQuestion || !isQuizActive || showFullscreenLeaderboard) return
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -196,7 +198,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [currentQuestion, isQuizActive, socket, sessionCode, quiz.questions])
+  }, [currentQuestion, isQuizActive, showFullscreenLeaderboard, socket, sessionCode, quiz.questions])
 
   const startQuiz = () => {
     if (!socket || participants.length === 0) return
@@ -237,27 +239,44 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
       }
     }
     
-    socket.emit('next-question', { sessionCode })
-    setAnsweredParticipants(new Set())
+    // Show fullscreen leaderboard for 5 seconds before next question
+    setShowFullscreenLeaderboard(true)
+    setLeaderboardCountdown(5)
     
-    const nextQuestionIndex = currentQuestion ? currentQuestion.questionNumber : 0
-    if (nextQuestionIndex < quiz.questions.length) {
-      const nextQ = quiz.questions[nextQuestionIndex]
-      const nextQuestionData = {
-        questionNumber: nextQuestionIndex + 1,
-        totalQuestions: quiz.questions.length,
-        question: {
-          id: nextQ.id,
-          text: nextQ.question,
-          type: nextQ.type,
-          options: nextQ.options,
-          timeLimit: nextQ.settings?.timeLimit || 30,
-          image: nextQ.image
+    // Start countdown timer
+    const countdownInterval = setInterval(() => {
+      setLeaderboardCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval)
+          setShowFullscreenLeaderboard(false)
+          
+          // Now proceed with next question
+          socket.emit('next-question', { sessionCode })
+          setAnsweredParticipants(new Set())
+          
+          const nextQuestionIndex = currentQuestion ? currentQuestion.questionNumber : 0
+          if (nextQuestionIndex < quiz.questions.length) {
+            const nextQ = quiz.questions[nextQuestionIndex]
+            const nextQuestionData = {
+              questionNumber: nextQuestionIndex + 1,
+              totalQuestions: quiz.questions.length,
+              question: {
+                id: nextQ.id,
+                text: nextQ.question,
+                type: nextQ.type,
+                options: nextQ.options,
+                timeLimit: nextQ.settings?.timeLimit || 30,
+                image: nextQ.image
+              }
+            }
+            setCurrentQuestion(nextQuestionData)
+            setTimeLeft(nextQuestionData.question.timeLimit)
+          }
+          return 0
         }
-      }
-      setCurrentQuestion(nextQuestionData)
-      setTimeLeft(nextQuestionData.question.timeLimit)
-    }
+        return prev - 1
+      })
+    }, 1000)
   }
 
   const showLeaderboard = () => {
@@ -362,6 +381,59 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     )
   }
 
+  // Fullscreen leaderboard during 5-second countdown
+  if (showFullscreenLeaderboard) {
+    const sortedParticipants = [...participants].sort((a, b) => b.score - a.score)
+    
+    return (
+      <div className="fixed inset-0 bg-black dark:bg-gray-900 flex items-center justify-center z-50">
+        <div className="text-center text-foreground max-w-4xl mx-auto p-8">
+          <div className="mb-8">
+            <h1 className="text-6xl font-bold mb-4 font-['Poppins'] text-white">Leaderboard</h1>
+            <div className="text-2xl font-semibold mb-2 text-gray-300">Next question in:</div>
+            <div className="text-8xl font-bold text-yellow-400">{leaderboardCountdown}</div>
+          </div>
+          
+          <div className="space-y-4">
+            {sortedParticipants.length === 0 ? (
+              <div className="text-2xl text-gray-400">No participants yet</div>
+            ) : (
+              sortedParticipants.slice(0, 5).map((participant, index) => (
+                <div key={participant.id} className={`flex items-center justify-between p-6 rounded-xl border-2 transition-all duration-300 ${
+                   index === 0 ? 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-yellow-400 shadow-lg shadow-yellow-400/20' :
+                   index === 1 ? 'bg-gradient-to-r from-gray-400/20 to-gray-500/20 border-gray-400 shadow-lg shadow-gray-400/20' :
+                   index === 2 ? 'bg-gradient-to-r from-orange-400/20 to-orange-500/20 border-orange-400 shadow-lg shadow-orange-400/20' :
+                   'bg-gradient-to-r from-gray-600/20 to-gray-700/20 border-gray-500 shadow-lg shadow-gray-500/20'
+                 }`}>
+                   <div className="flex items-center space-x-6">
+                     <div className="flex items-center space-x-3">
+                       {index === 0 && <Crown className="h-12 w-12 text-yellow-400 animate-pulse" />}
+                       <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl border-2 ${
+                         index === 0 ? 'bg-yellow-500 border-yellow-400' :
+                         index === 1 ? 'bg-gray-500 border-gray-400' :
+                         index === 2 ? 'bg-orange-500 border-orange-400' :
+                         'bg-gray-600 border-gray-500'
+                       }`}>
+                         {index + 1}
+                       </div>
+                     </div>
+                     <div className="text-left">
+                       <div className="font-bold text-3xl text-white font-['Poppins']">{participant.name}</div>
+                     </div>
+                   </div>
+                   <div className="text-right">
+                     <div className="text-3xl font-bold text-white">{participant.score}</div>
+                     <div className="text-lg text-gray-300">pts</div>
+                   </div>
+                 </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-black dark:bg-gray-900 p-3 sm:p-4 transition-colors duration-300 font-['Poppins']">
       <div className="max-w-6xl mx-auto">
@@ -407,8 +479,38 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                     <div className="flex justify-center mb-4 sm:mb-6">
                       <Button 
                         variant="outline" 
-                        onClick={() => navigator.clipboard.writeText(sessionCode)}
-                        className="flex items-center gap-2"
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(sessionCode)
+                            // Show success feedback
+                            const button = document.activeElement as HTMLButtonElement
+                            const originalText = button.textContent
+                            button.textContent = 'Copied!'
+                            button.style.backgroundColor = '#10b981'
+                            button.style.color = 'white'
+                            setTimeout(() => {
+                              button.textContent = originalText
+                              button.style.backgroundColor = ''
+                              button.style.color = ''
+                            }, 2000)
+                          } catch (err) {
+                            console.error('Failed to copy session code:', err)
+                            // Fallback for older browsers
+                            const textArea = document.createElement('textarea')
+                            textArea.value = sessionCode
+                            document.body.appendChild(textArea)
+                            textArea.select()
+                            try {
+                              document.execCommand('copy')
+                              alert('Session code copied to clipboard!')
+                            } catch (fallbackErr) {
+                              console.error('Fallback copy failed:', fallbackErr)
+                              alert(`Copy failed. Session code: ${sessionCode}`)
+                            }
+                            document.body.removeChild(textArea)
+                          }
+                        }}
+                        className="flex items-center gap-2 transition-all duration-200"
                       >
                         <Copy className="h-4 w-4" />
                         Copy Code
