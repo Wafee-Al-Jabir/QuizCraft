@@ -79,6 +79,9 @@ export default function HomePage() {
                 <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700">
                   v{packageJson.version}
                 </Badge>
+                <Badge className="text-xs px-2 py-0.5 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold">
+                  BETA
+                </Badge>
               </div>
               <p className="text-xs sm:text-sm font-zen-dots text-gray-500 dark:text-gray-400 -mt-1">Test your IQ with us</p>
             </div>
