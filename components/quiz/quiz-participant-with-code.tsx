@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { AlertCircle, Trophy, Clock, Users, CheckCircle, XCircle } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
-import { WaitingRoomGame } from './waiting-room-game'
+
 
 interface QuizParticipantWithCodeProps {
   sessionCode: string
@@ -592,11 +592,108 @@ export function QuizParticipantWithCode({ sessionCode, onClose }: QuizParticipan
   // Waiting room
   return (
     <>
-      <WaitingRoomGame 
-        participants={participants}
-        participantName={participantName}
-        quizInfo={quizInfo}
-      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-white mb-2">
+              {quizInfo?.title || 'Quiz'}
+            </h1>
+            {quizInfo?.description && (
+              <p className="text-gray-300 text-lg">{quizInfo.description}</p>
+            )}
+          </div>
+
+          {/* Waiting Room Card */}
+          <Card className="dark:bg-gray-800 dark:border-gray-700 mb-6">
+            <CardHeader className="text-center">
+              <CardTitle className="flex items-center justify-center text-2xl">
+                <Users className="h-6 w-6 mr-2" />
+                Waiting Room
+              </CardTitle>
+              <CardDescription className="text-lg">
+                Waiting for the host to start the quiz...
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Get ready! The quiz will begin shortly.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Participants List */}
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Users className="h-5 w-5 mr-2" />
+                Participants ({participants.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
+                {participants.map((participant) => (
+                  <div 
+                    key={participant.id} 
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
+                      participant.name === participantName 
+                        ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 shadow-md' 
+                        : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
+                    }`}
+                  >
+                    <span className={`font-medium ${
+                      participant.name === participantName 
+                        ? 'text-blue-800 dark:text-blue-200' 
+                        : 'text-gray-800 dark:text-gray-200'
+                    }`}>
+                      {participant.name}
+                      {participant.name === participantName && ' (You)'}
+                    </span>
+                  </div>
+                ))}
+                {participants.length === 0 && (
+                  <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+                    No participants yet. Share the session code to get started!
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quiz Info */}
+          {quizInfo && (
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {quizInfo.totalQuestions}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Questions
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {quizInfo.timePerQuestion}s
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Per Question
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      </div>
       
       {/* Mini-leaderboard overlay */}
       {showMiniLeaderboard && miniLeaderboard && (
