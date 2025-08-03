@@ -8,7 +8,7 @@
     "pnpm": ">=7.0.0"
   },
   "scripts": {
-    "build": " npm install && pnpm install --save-dev typescript && npm exec next build && rm -rf .next",
+    "build": " npm install && pnpm install --save-dev typescript && npm exec next build && rm -rf .next && next build",
     "build:win": "build.bat",
     "build:deploy": "npm exec next build",
     "build:test": "node scripts/test-build.js",
