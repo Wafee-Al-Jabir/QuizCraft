@@ -105,7 +105,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
         // Generate base QR code
         await QRCode.toCanvas(canvas, joinUrl, {
           width: 300,
-          height: 300, // Make it square
+          // Height is automatically set to width for square QR codes
           margin: 2,
           color: {
             dark: '#000000',
@@ -114,19 +114,27 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
           errorCorrectionLevel: 'H' // High error correction for logo overlay
         })
         
+        if (!ctx) {
+          throw new Error('Could not get canvas context')
+        }
+        
         // Load and draw logo in center
         const logo = new Image()
         logo.crossOrigin = 'anonymous'
         logo.onload = () => {
-          const logoSize = canvas.width * 0.25 // 25% of QR code size (bigger)
-          const logoX = (canvas.width - logoSize) / 2
-          const logoY = (canvas.height - logoSize) / 2
+          // Ensure canvas dimensions are set
+          const canvasWidth = canvas.width || 300
+          const canvasHeight = canvas.height || 300
+          
+          const logoSize = canvasWidth * 0.25 // 25% of QR code size (bigger)
+          const logoX = (canvasWidth - logoSize) / 2
+          const logoY = (canvasHeight - logoSize) / 2
           
           // Draw larger white background square for logo with more padding
           ctx.fillStyle = '#FFFFFF'
           const squareSize = logoSize + 30 // 12px padding on each side
-          const squareX = (canvas.width - squareSize) / 2
-          const squareY = (canvas.height - squareSize) / 2
+          const squareX = (canvasWidth - squareSize) / 2
+          const squareY = (canvasHeight - squareSize) / 2
           ctx.fillRect(squareX, squareY, squareSize, squareSize)
           
           // Draw logo
