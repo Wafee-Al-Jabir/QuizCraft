@@ -96,16 +96,55 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
       
       // Generate QR code for the session
       try {
-        const joinUrl = `https://quizcraft-knjk.onrender.com/quiz/join/${data.sessionCode}`
-        const qrCodeDataUrl = await QRCode.toDataURL(joinUrl, {
+        const joinUrl = `https://quizcraft-yh0t.onrender.com/quiz/join/${data.sessionCode}`
+        
+        // Create a canvas to generate QR code with logo
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        
+        // Generate base QR code
+        await QRCode.toCanvas(canvas, joinUrl, {
           width: 300,
+          height: 300, // Make it square
           margin: 2,
           color: {
             dark: '#000000',
             light: '#FFFFFF'
-          }
+          },
+          errorCorrectionLevel: 'H' // High error correction for logo overlay
         })
-        setQrCodeUrl(qrCodeDataUrl)
+        
+        // Load and draw logo in center
+        const logo = new Image()
+        logo.crossOrigin = 'anonymous'
+        logo.onload = () => {
+          const logoSize = canvas.width * 0.25 // 25% of QR code size (bigger)
+          const logoX = (canvas.width - logoSize) / 2
+          const logoY = (canvas.height - logoSize) / 2
+          
+          // Draw larger white background square for logo with more padding
+          ctx.fillStyle = '#FFFFFF'
+          const squareSize = logoSize + 30 // 12px padding on each side
+          const squareX = (canvas.width - squareSize) / 2
+          const squareY = (canvas.height - squareSize) / 2
+          ctx.fillRect(squareX, squareY, squareSize, squareSize)
+          
+          // Draw logo
+          ctx.drawImage(logo, logoX, logoY, logoSize, logoSize)
+          
+          // Convert to data URL
+          const qrCodeDataUrl = canvas.toDataURL('image/png')
+          setQrCodeUrl(qrCodeDataUrl)
+        }
+        
+        logo.onerror = () => {
+          // Fallback: use QR code without logo
+          const qrCodeDataUrl = canvas.toDataURL('image/png')
+          setQrCodeUrl(qrCodeDataUrl)
+        }
+        
+        logo.src = '/logo.png'
+        
       } catch (error) {
         console.error('Failed to generate QR code:', error)
       }
@@ -474,7 +513,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                 <CardContent>
                   <div className="text-center py-6 sm:py-8">
                     <div className="text-xs text-gray-400 mb-2">
-                      quizcraft-knjk.onrender.com/quiz/join/
+                      quizcraft-yh0t.onrender.com/quiz/join/
                     </div>
                     <div className="text-4xl sm:text-6xl font-bold text-slate-800 dark:text-slate-200 mb-6 sm:mb-8" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
                     
