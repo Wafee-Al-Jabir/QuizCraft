@@ -5,7 +5,10 @@ export interface User {
   firstName: string
   lastName: string
   email: string
-  password: string
+  password?: string // Optional for OAuth users
+  provider?: string // OAuth provider (e.g., 'google', 'credentials')
+  providerId?: string // OAuth provider user ID
+  image?: string // Profile image URL from OAuth provider
   createdAt: string
   streakData?: {
     currentStreak: number

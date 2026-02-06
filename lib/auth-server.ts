@@ -57,6 +57,22 @@ export async function createUser(userData: Omit<User, "id" | "createdAt">): Prom
   }
 }
 
+export async function findUserByProvider(provider: string, providerId: string): Promise<User | null> {
+  try {
+    const db = await getDatabase()
+    const userDoc = await db.collection<UserDocument>("users").findOne({ 
+      provider, 
+      providerId 
+    })
+    
+    if (!userDoc) return null
+    return userDocumentToUser(userDoc)
+  } catch (error) {
+    console.error("Error finding user by provider:", error)
+    return null
+  }
+}
+
 export async function findUserByEmail(email: string): Promise<User | null> {
   try {
     const db = await getDatabase()

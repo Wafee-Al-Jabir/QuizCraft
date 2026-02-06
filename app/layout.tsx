@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { SocketProvider } from "@/lib/socket-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthSessionProvider } from "@/components/providers/session-provider";
 import { ErrorFooter } from "@/components/ui/error-footer"
 
 export const metadata: Metadata = {
@@ -36,21 +37,23 @@ export default function RootLayout({
         </noscript>
       </head>
       <body className="font-[Poppins] bg-background text-foreground">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SocketProvider>
-            <div className="flex flex-col min-h-screen">
-              <div className="flex-1">
-                {children}
+        <AuthSessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SocketProvider>
+              <div className="flex flex-col min-h-screen">
+                <div className="flex-1">
+                  {children}
+                </div>
+                <ErrorFooter />
               </div>
-              <ErrorFooter />
-            </div>
-          </SocketProvider>
-        </ThemeProvider>
+            </SocketProvider>
+          </ThemeProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   )
