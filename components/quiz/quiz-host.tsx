@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Users, Play, SkipForward, Trophy, Clock, CheckCircle, BarChart3, MessageSquare, QrCode, Copy } from 'lucide-react'
+import { Users, Play, SkipForward, Trophy, Clock, CheckCircle, BarChart3, MessageSquare, QrCode, Copy, Crown } from 'lucide-react'
 import { useSocket } from '@/lib/socket-context'
 import { saveLiveSessionParticipants } from '@/lib/quiz-actions'
 import { SimpleThemeToggle } from '@/components/ui/theme-toggle'
@@ -65,6 +65,8 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
   const [activePoll, setActivePoll] = useState<{question: string, options: string[]} | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('')
+  const [showFullscreenLeaderboard, setShowFullscreenLeaderboard] = useState(false)
+  const [leaderboardCountdown, setLeaderboardCountdown] = useState(0)
 
   useEffect(() => {
     if (!socket || !isConnected) return
@@ -94,16 +96,63 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
       
       // Generate QR code for the session
       try {
-        const joinUrl = `https://quizcraft-knjk.onrender.com/quiz/join/${data.sessionCode}`
-        const qrCodeDataUrl = await QRCode.toDataURL(joinUrl, {
+        const joinUrl = `https://quizcraft-yh0t.onrender.com/quiz/join/${data.sessionCode}`
+        
+        // Create a canvas to generate QR code with logo
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        
+        // Generate base QR code
+        await QRCode.toCanvas(canvas, joinUrl, {
           width: 300,
+          // Height is automatically set to width for square QR codes
           margin: 2,
           color: {
             dark: '#000000',
             light: '#FFFFFF'
-          }
+          },
+          errorCorrectionLevel: 'H' // High error correction for logo overlay
         })
-        setQrCodeUrl(qrCodeDataUrl)
+        
+        if (!ctx) {
+          throw new Error('Could not get canvas context')
+        }
+        
+        // Load and draw logo in center
+        const logo = new Image()
+        logo.crossOrigin = 'anonymous'
+        logo.onload = () => {
+          // Ensure canvas dimensions are set
+          const canvasWidth = canvas.width || 300
+          const canvasHeight = canvas.height || 300
+          
+          const logoSize = canvasWidth * 0.25 // 25% of QR code size (bigger)
+          const logoX = (canvasWidth - logoSize) / 2
+          const logoY = (canvasHeight - logoSize) / 2
+          
+          // Draw larger white background square for logo with more padding
+          ctx.fillStyle = '#FFFFFF'
+          const squareSize = logoSize + 30 // 12px padding on each side
+          const squareX = (canvasWidth - squareSize) / 2
+          const squareY = (canvasHeight - squareSize) / 2
+          ctx.fillRect(squareX, squareY, squareSize, squareSize)
+          
+          // Draw logo
+          ctx.drawImage(logo, logoX, logoY, logoSize, logoSize)
+          
+          // Convert to data URL
+          const qrCodeDataUrl = canvas.toDataURL('image/png')
+          setQrCodeUrl(qrCodeDataUrl)
+        }
+        
+        logo.onerror = () => {
+          // Fallback: use QR code without logo
+          const qrCodeDataUrl = canvas.toDataURL('image/png')
+          setQrCodeUrl(qrCodeDataUrl)
+        }
+        
+        logo.src = '/logo.png'
+        
       } catch (error) {
         console.error('Failed to generate QR code:', error)
       }
@@ -174,11 +223,21 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
 
   // Timer effect for host - continues running even after participants answer
   useEffect(() => {
-    if (!currentQuestion || !isQuizActive) return
+    if (!currentQuestion || !isQuizActive || showFullscreenLeaderboard) return
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
+          // Check if current question has showLeaderboardAfter enabled
+          const currentQuestionIndex = currentQuestion.questionNumber - 1
+          const questionSettings = quiz.questions[currentQuestionIndex]?.settings
+          if (questionSettings?.showLeaderboardAfter && socket) {
+            // Emit show-question-results event when timer reaches 0
+            socket.emit('show-question-results', { 
+              sessionCode, 
+              questionIndex: currentQuestionIndex 
+            })
+          }
           return 0
         }
         return prev - 1
@@ -186,7 +245,7 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [currentQuestion, isQuizActive])
+  }, [currentQuestion, isQuizActive, showFullscreenLeaderboard, socket, sessionCode, quiz.questions])
 
   const startQuiz = () => {
     if (!socket || participants.length === 0) return
@@ -214,27 +273,57 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
   const nextQuestion = () => {
     if (!socket) return
     
-    socket.emit('next-question', { sessionCode })
-    setAnsweredParticipants(new Set())
-    
-    const nextQuestionIndex = currentQuestion ? currentQuestion.questionNumber : 0
-    if (nextQuestionIndex < quiz.questions.length) {
-      const nextQ = quiz.questions[nextQuestionIndex]
-      const nextQuestionData = {
-        questionNumber: nextQuestionIndex + 1,
-        totalQuestions: quiz.questions.length,
-        question: {
-          id: nextQ.id,
-          text: nextQ.question,
-          type: nextQ.type,
-          options: nextQ.options,
-          timeLimit: nextQ.settings?.timeLimit || 30,
-          image: nextQ.image
-        }
+    // Check if current question has showLeaderboardAfter enabled before moving to next
+    if (currentQuestion) {
+      const currentQuestionIndex = currentQuestion.questionNumber - 1
+      const questionSettings = quiz.questions[currentQuestionIndex]?.settings
+      if (questionSettings?.showLeaderboardAfter) {
+        // Emit show-question-results event before advancing
+        socket.emit('show-question-results', { 
+          sessionCode, 
+          questionIndex: currentQuestionIndex 
+        })
       }
-      setCurrentQuestion(nextQuestionData)
-      setTimeLeft(nextQuestionData.question.timeLimit)
     }
+    
+    // Show fullscreen leaderboard for 5 seconds before next question
+    setShowFullscreenLeaderboard(true)
+    setLeaderboardCountdown(5)
+    
+    // Start countdown timer
+    const countdownInterval = setInterval(() => {
+      setLeaderboardCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval)
+          setShowFullscreenLeaderboard(false)
+          
+          // Now proceed with next question
+          socket.emit('next-question', { sessionCode })
+          setAnsweredParticipants(new Set())
+          
+          const nextQuestionIndex = currentQuestion ? currentQuestion.questionNumber : 0
+          if (nextQuestionIndex < quiz.questions.length) {
+            const nextQ = quiz.questions[nextQuestionIndex]
+            const nextQuestionData = {
+              questionNumber: nextQuestionIndex + 1,
+              totalQuestions: quiz.questions.length,
+              question: {
+                id: nextQ.id,
+                text: nextQ.question,
+                type: nextQ.type,
+                options: nextQ.options,
+                timeLimit: nextQ.settings?.timeLimit || 30,
+                image: nextQ.image
+              }
+            }
+            setCurrentQuestion(nextQuestionData)
+            setTimeLeft(nextQuestionData.question.timeLimit)
+          }
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
   }
 
   const showLeaderboard = () => {
@@ -339,6 +428,59 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
     )
   }
 
+  // Fullscreen leaderboard during 5-second countdown
+  if (showFullscreenLeaderboard) {
+    const sortedParticipants = [...participants].sort((a, b) => b.score - a.score)
+    
+    return (
+      <div className="fixed inset-0 bg-black dark:bg-gray-900 flex items-center justify-center z-50">
+        <div className="text-center text-foreground max-w-4xl mx-auto p-8">
+          <div className="mb-8">
+            <h1 className="text-6xl font-bold mb-4 font-['Poppins'] text-white">Leaderboard</h1>
+            <div className="text-2xl font-semibold mb-2 text-gray-300">Next question in:</div>
+            <div className="text-8xl font-bold text-yellow-400">{leaderboardCountdown}</div>
+          </div>
+          
+          <div className="space-y-4">
+            {sortedParticipants.length === 0 ? (
+              <div className="text-2xl text-gray-400">No participants yet</div>
+            ) : (
+              sortedParticipants.slice(0, 5).map((participant, index) => (
+                <div key={participant.id} className={`flex items-center justify-between p-6 rounded-xl border-2 transition-all duration-300 ${
+                   index === 0 ? 'bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-yellow-400 shadow-lg shadow-yellow-400/20' :
+                   index === 1 ? 'bg-gradient-to-r from-gray-400/20 to-gray-500/20 border-gray-400 shadow-lg shadow-gray-400/20' :
+                   index === 2 ? 'bg-gradient-to-r from-orange-400/20 to-orange-500/20 border-orange-400 shadow-lg shadow-orange-400/20' :
+                   'bg-gradient-to-r from-gray-600/20 to-gray-700/20 border-gray-500 shadow-lg shadow-gray-500/20'
+                 }`}>
+                   <div className="flex items-center space-x-6">
+                     <div className="flex items-center space-x-3">
+                       {index === 0 && <Crown className="h-12 w-12 text-yellow-400 animate-pulse" />}
+                       <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl border-2 ${
+                         index === 0 ? 'bg-yellow-500 border-yellow-400' :
+                         index === 1 ? 'bg-gray-500 border-gray-400' :
+                         index === 2 ? 'bg-orange-500 border-orange-400' :
+                         'bg-gray-600 border-gray-500'
+                       }`}>
+                         {index + 1}
+                       </div>
+                     </div>
+                     <div className="text-left">
+                       <div className="font-bold text-3xl text-white font-['Poppins']">{participant.name}</div>
+                     </div>
+                   </div>
+                   <div className="text-right">
+                     <div className="text-3xl font-bold text-white">{participant.score}</div>
+                     <div className="text-lg text-gray-300">pts</div>
+                   </div>
+                 </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-black dark:bg-gray-900 p-3 sm:p-4 transition-colors duration-300 font-['Poppins']">
       <div className="max-w-6xl mx-auto">
@@ -362,9 +504,9 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 min-h-[calc(100vh-200px)]">
           {/* Main Content */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 flex flex-col">
             {isWaitingRoom ? (
               <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardHeader>
@@ -378,19 +520,29 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-6 sm:py-8">
-                    <div className="text-4xl sm:text-6xl font-bold text-slate-800 dark:text-slate-200 mb-3 sm:mb-4" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
-                    <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Participants can join using this code</p>
-                    
-                    <div className="flex justify-center mb-4 sm:mb-6">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => navigator.clipboard.writeText(sessionCode)}
-                        className="flex items-center gap-2"
-                      >
-                        <Copy className="h-4 w-4" />
-                        Copy Code
-                      </Button>
+                    <div className="text-xs text-gray-400 mb-2">
+                      quizcraft-yh0t.onrender.com/quiz/join/
                     </div>
+                    <div className="text-4xl sm:text-6xl font-bold text-slate-800 dark:text-slate-200 mb-6 sm:mb-8" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>{sessionCode}</div>
+                    
+                    {/* QR Code Section */}
+                    {qrCodeUrl && (
+                      <div className="mb-6 sm:mb-8">
+                        <div className="flex items-center justify-center mb-3">
+                          <QrCode className="h-4 w-4 mr-2 text-gray-600" />
+                          <span className="text-sm text-gray-600">Scan to join</span>
+                        </div>
+                        <div className="flex justify-center">
+                          <div className="bg-white p-4 rounded-lg shadow-lg border">
+                            <img 
+                              src={qrCodeUrl} 
+                              alt="QR Code to join quiz" 
+                              className="w-64 h-64 sm:w-72 sm:h-72"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     
                     <Button 
                       onClick={startQuiz} 
@@ -561,156 +713,62 @@ export function QuizHost({ quiz, onClose }: QuizHostProps) {
           </div>
 
           {/* Participants Sidebar */}
-          <div>
-            <Card>
+          <div className="h-full">
+            <Card className="h-full flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center text-lg sm:text-xl">
                   <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   Participants ({participants.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2 sm:space-y-3 max-h-80 sm:max-h-96 overflow-y-auto">
+              <CardContent className="flex-1 overflow-hidden">
+                <div className="space-y-2 sm:space-y-3 h-full overflow-y-auto">
                   {participants.length === 0 ? (
-                    <div className="text-center py-3 sm:py-4 text-gray-500 text-sm">
-                      No participants yet
+                    <div className="text-center py-8 text-gray-500 text-sm">
+                      <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <p className="text-lg font-medium mb-2">No participants yet</p>
+                      <p className="text-sm">Share the session code to get started!</p>
                     </div>
                   ) : (
                     participants
                       .sort((a, b) => b.score - a.score)
                       .map((participant, index) => (
-                        <div key={participant.id} className="flex items-center justify-between p-2 sm:p-3 bg-gray-800 dark:bg-gray-700 rounded-lg">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-slate-700 dark:bg-slate-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
-                              {index + 1}
+                        <div key={participant.id} className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-gray-800/80 to-gray-700/80 hover:from-gray-700/80 hover:to-gray-600/80 rounded-xl border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200 shadow-lg hover:shadow-xl">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base border-2 ${
+                              index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 border-yellow-300 shadow-lg shadow-yellow-400/30' :
+                              index === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-600 border-gray-300 shadow-lg shadow-gray-400/30' :
+                              index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 border-orange-300 shadow-lg shadow-orange-400/30' :
+                              'bg-gradient-to-br from-slate-500 to-slate-700 border-slate-400 shadow-lg shadow-slate-400/30'
+                            }`}>
+                              {index === 0 && <Crown className="h-4 w-4 sm:h-5 sm:w-5" />}
+                              {index !== 0 && (index + 1)}
                             </div>
-                            <span className="font-medium text-xs sm:text-sm text-white">{participant.name}</span>
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-sm sm:text-base text-white">{participant.name}</span>
+                              {index === 0 && <span className="text-xs text-yellow-300 font-medium">Leader</span>}
+                            </div>
                             {answeredParticipants.has(participant.id) && (
-                              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-400 animate-pulse" />
                             )}
                           </div>
-                          <Badge variant="secondary" className="text-xs">
-                            {participant.score}
-                          </Badge>
+                          <div className="text-right">
+                            <Badge variant="secondary" className={`text-sm font-bold px-3 py-1 ${
+                              index === 0 ? 'bg-yellow-500/20 text-yellow-300 border-yellow-400/30' :
+                              index === 1 ? 'bg-gray-500/20 text-gray-300 border-gray-400/30' :
+                              index === 2 ? 'bg-orange-500/20 text-orange-300 border-orange-400/30' :
+                              'bg-slate-500/20 text-slate-300 border-slate-400/30'
+                            }`}>
+                              {participant.score}
+                            </Badge>
+                            <div className="text-xs text-gray-400 mt-1">points</div>
+                          </div>
                         </div>
                       ))
                   )}
                 </div>
               </CardContent>
             </Card>
-            
-            {/* QR Code Section - Always Visible */}
-            {sessionCode && (
-              <Card className="mt-3 sm:mt-4">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-lg sm:text-xl">
-                    <QrCode className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                    Join Quiz
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <div className="space-y-3">
-                    <div className="text-2xl font-bold text-slate-800 dark:text-slate-200" style={{fontFamily: 'Poppins, sans-serif', fontWeight: '600', letterSpacing: '0.1em'}}>
-                      {sessionCode}
-                    </div>
-                    
-                    {qrCodeUrl && (
-                      <div className="flex justify-center">
-                        <img 
-                          src={qrCodeUrl} 
-                          alt="QR Code to join quiz" 
-                          className="w-48 h-48 border-2 border-gray-300 rounded-lg"
-                        />
-                      </div>
-                    )}
-                    
-                    <p className="text-xs text-gray-500">Scan QR code or use session code to join</p>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => navigator.clipboard.writeText(sessionCode)}
-                      className="flex items-center gap-2 w-full"
-                    >
-                      <Copy className="h-3 w-3" />
-                      Copy Code
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Poll Creation Form */}
-            {!isWaitingRoom && (
-              <Card className="mt-3 sm:mt-4">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-lg sm:text-xl">
-                    <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                    Create Poll
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3 sm:space-y-4">
-                    <div>
-                      <Label htmlFor="poll-question" className="text-sm sm:text-base">Poll Question</Label>
-                      <Input
-                        id="poll-question"
-                        value={pollQuestion}
-                        onChange={(e) => setPollQuestion(e.target.value)}
-                        placeholder="Enter your poll question..."
-                        className="mt-1 text-sm sm:text-base"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label className="text-sm sm:text-base">Poll Options</Label>
-                      <div className="space-y-2 mt-1">
-                        {pollOptions.map((option, index) => (
-                          <div key={index} className="flex items-center space-x-2">
-                            <Input
-                              value={option}
-                              onChange={(e) => updatePollOption(index, e.target.value)}
-                              placeholder={`Option ${index + 1}`}
-                              className="flex-1 text-sm sm:text-base"
-                            />
-                            {pollOptions.length > 2 && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => removePollOption(index)}
-                                className="px-2 sm:px-3"
-                              >
-                                ×
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={addPollOption}
-                          disabled={pollOptions.length >= 6}
-                          className="text-xs sm:text-sm"
-                        >
-                          Add Option
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={showPoll}
-                          disabled={!pollQuestion.trim() || !pollOptions.every(opt => opt.trim())}
-                          className="text-xs sm:text-sm"
-                        >
-                          Start Poll
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </div>

@@ -28,22 +28,24 @@ interface SocketProviderProps {
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
     // Initialize socket connection
     const socketInstance = io(process.env.NODE_ENV === 'production' ? '' : window.location.origin, {
-      transports: ['websocket', 'polling']
+      timeout: 20000,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+      autoConnect: true,
     })
 
     socketInstance.on('connect', () => {
-      console.log('Connected to server')
+      console.log('Connected to server with ID:', socketInstance.id)
       setIsConnected(true)
     })
 
-    socketInstance.on('disconnect', () => {
-      console.log('Disconnected from server')
+    socketInstance.on('disconnect', (reason) => {
+      console.log('Disconnected from server. Reason:', reason)
       setIsConnected(false)
     })
 
@@ -52,17 +54,27 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       setIsConnected(false)
     })
 
+    socketInstance.on('reconnect', (attemptNumber) => {
+      console.log('Reconnected after', attemptNumber, 'attempts')
+      setIsConnected(true)
+    })
+
+    socketInstance.on('reconnect_error', (error) => {
+      console.error('Reconnection error:', error)
+    })
+
     setSocket(socketInstance)
 
     return () => {
+      console.log('Cleaning up socket connection')
       socketInstance.close()
     }
   }, [])
 
   return (
     <SocketContext.Provider value={{ 
-      socket: mounted ? socket : null, 
-      isConnected: mounted ? isConnected : false 
+      socket, 
+      isConnected 
     }}>
       {children}
     </SocketContext.Provider>

@@ -17,6 +17,15 @@ export function ErrorFooter() {
               wafee.aljabir@gmail.com
             </a>
           </span>
+          <span>
+            or email{" "}
+            <a 
+              href="mailto:wahe@virtunus.com" 
+              className="text-primary hover:underline transition-colors"
+            >
+              wahee@virtunus.com
+            </a>
+          </span>
         </div>
       </div>
     </footer>

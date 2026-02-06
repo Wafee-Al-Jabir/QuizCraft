@@ -102,6 +102,19 @@ export function QuizEditForm({ quiz, user }: QuizEditFormProps) {
       alert('JSON copied to clipboard!')
     } catch (err) {
       console.error('Failed to copy: ', err)
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea')
+      textArea.value = exportJson
+      document.body.appendChild(textArea)
+      textArea.select()
+      try {
+        document.execCommand('copy')
+        alert('JSON copied to clipboard!')
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed:', fallbackErr)
+        alert('Copy failed. Please manually select and copy the text.')
+      }
+      document.body.removeChild(textArea)
     }
   }
 
