@@ -12,9 +12,6 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { DonateCheckoutForm } from "@/components/donate/donate-checkout-form"
 
-const MIN_DONATION_CENTS = 100
-const MAX_DONATION_CENTS = 500000
-
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
 const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
 
@@ -58,16 +55,8 @@ export default function DonatePage() {
     setErrorMessage(null)
     setStatusMessage(null)
 
-    if (!amountInCents) {
+    if (!amountInCents || amountInCents <= 0) {
       setErrorMessage("Enter a valid donation amount.")
-      return
-    }
-    if (amountInCents < MIN_DONATION_CENTS) {
-      setErrorMessage(`Minimum donation is ${formatAmount(MIN_DONATION_CENTS)}.`)
-      return
-    }
-    if (amountInCents > MAX_DONATION_CENTS) {
-      setErrorMessage(`Maximum donation is ${formatAmount(MAX_DONATION_CENTS)}.`)
       return
     }
 
@@ -149,7 +138,6 @@ export default function DonatePage() {
                 <Input
                   id="donation-amount"
                   type="number"
-                  min="1"
                   step="0.01"
                   value={amount}
                   onChange={(event) => handleAmountChange(event.target.value)}

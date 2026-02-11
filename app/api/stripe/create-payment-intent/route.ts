@@ -8,9 +8,6 @@ const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, { apiVersion: "2024-06-20" })
   : null
 
-const MIN_DONATION_CENTS = 100
-const MAX_DONATION_CENTS = 500000
-
 export async function POST(request: Request) {
   if (!stripe) {
     return NextResponse.json(
@@ -39,22 +36,8 @@ export async function POST(request: Request) {
   const amount = Number(payload.amount)
   const currency = (payload.currency || "usd").toLowerCase()
 
-  if (!Number.isInteger(amount)) {
-    return NextResponse.json({ error: "Amount must be an integer." }, { status: 400 })
-  }
-
-  if (amount < MIN_DONATION_CENTS) {
-    return NextResponse.json(
-      { error: `Minimum donation is $${(MIN_DONATION_CENTS / 100).toFixed(2)}.` },
-      { status: 400 }
-    )
-  }
-
-  if (amount > MAX_DONATION_CENTS) {
-    return NextResponse.json(
-      { error: `Maximum donation is $${(MAX_DONATION_CENTS / 100).toFixed(2)}.` },
-      { status: 400 }
-    )
+  if (!Number.isInteger(amount) || amount <= 0) {
+    return NextResponse.json({ error: "Amount must be a positive integer." }, { status: 400 })
   }
 
   if (currency !== "usd") {
