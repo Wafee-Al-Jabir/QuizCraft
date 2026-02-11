@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUserServer } from '@/lib/auth-server'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUserServer()
+    const user = await getCurrentUser()
     
     if (!user) {
       return NextResponse.json({ user: null }, { status: 200 })

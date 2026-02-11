@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { getQuiz } from "@/lib/quiz-actions"
-import { getCurrentUserServer } from "@/lib/auth-server"
+import { getCurrentUser } from "@/lib/auth-utils"
 import { QuizHostWrapper } from "@/components/quiz/quiz-host-wrapper"
 
 interface QuizHostPageProps {
@@ -9,7 +9,7 @@ interface QuizHostPageProps {
 
 export default async function QuizHostPage({ params }: QuizHostPageProps) {
   const { id } = await params
-  const user = await getCurrentUserServer()
+  const user = await getCurrentUser()
   
   if (!user) {
     redirect("/auth/signin")

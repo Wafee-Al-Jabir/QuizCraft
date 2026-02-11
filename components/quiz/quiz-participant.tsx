@@ -11,9 +11,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Celebration } from '@/components/ui/celebration'
 import { AchievementNotification, useAchievementNotification } from '@/components/ui/achievement-notification'
-import { Users, Clock, Trophy, AlertCircle } from 'lucide-react'
+import { AlertCircle, Users, Clock, Trophy, CheckCircle, XCircle } from 'lucide-react'
 import { useSocket } from '@/lib/socket-context'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp"
+import { motion } from "framer-motion"
 
 interface QuizParticipantProps {
   onClose: () => void
@@ -83,8 +89,9 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
 
     // Listen for successful join
     socket.on('joined-quiz', (data) => {
+      console.log('✅ Successfully joined quiz:', data)
       setHasJoined(true)
-      setQuizInfo(data.quiz)
+      setQuizInfo(data.quiz || data.quizInfo)
       setIsJoining(false)
       setError('')
       
@@ -389,93 +396,127 @@ export function QuizParticipant({ onClose }: QuizParticipantProps) {
 
   if (!hasJoined) {
     return (
-      <div className="min-h-screen bg-black dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
-        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="font-sans">
-              {joinStep === 'code' ? 'Enter Quiz Code' : 'Enter Your Name'}
-            </CardTitle>
-            <CardDescription className="font-sans">
-              {joinStep === 'code' 
-                ? 'Enter the 6-digit session code to continue' 
-                : 'Choose a name to join the quiz'
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="font-sans">{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            {joinStep === 'code' ? (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="sessionCode" className="font-sans">Session Code</Label>
-                  <Input
-                    id="sessionCode"
-                    placeholder="Enter 6-digit code"
-                    value={sessionCode}
-                    onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
-                    maxLength={6}
-                    className="text-center text-lg font-sans tracking-wider"
-                    autoFocus
-                  />
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 transition-colors duration-300 font-[Poppins]">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-md"
+        >
+          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl">
+            <CardHeader className="text-center pb-2">
+              <div className="mx-auto bg-indigo-600/10 p-3 rounded-2xl w-fit mb-4">
+                <Trophy className="h-8 w-8 text-indigo-600" />
+              </div>
+              <CardTitle className="text-3xl font-bold tracking-tight font-[Poppins]">
+                {joinStep === 'code' ? 'Join a Quiz' : 'Ready to Play?'}
+              </CardTitle>
+              <CardDescription className="text-base font-[Poppins]">
+                {joinStep === 'code' 
+                  ? 'Enter the 6-digit code to start your challenge' 
+                  : 'Choose a nickname to enter the arena'
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-8 pt-6">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                >
+                  <Alert variant="destructive" className="border-red-500/50 bg-red-500/10">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="font-[Poppins]">{error}</AlertDescription>
+                  </Alert>
+                </motion.div>
+              )}
+              
+              {joinStep === 'code' ? (
+                <div className="flex flex-col items-center space-y-8">
+                  <div className="space-y-4 w-full flex flex-col items-center">
+                    <Label htmlFor="sessionCode" className="text-sm font-semibold uppercase tracking-widest text-muted-foreground font-[Poppins]">
+                      Enter Quiz Code
+                    </Label>
+                    <InputOTP
+                      maxLength={6}
+                      value={sessionCode}
+                      onChange={(value) => {
+                        setSessionCode(value.toUpperCase());
+                        if (value.length === 6) {
+                          // Small delay to allow user to see the last digit
+                          setTimeout(() => {
+                            window.location.href = `/quiz/join/${value.toUpperCase()}`;
+                          }, 300);
+                        }
+                      }}
+                      className="gap-3"
+                      autoFocus
+                    >
+                      <InputOTPGroup className="gap-2">
+                        {[0, 1, 2, 3, 4, 5].map((index) => (
+                          <InputOTPSlot 
+                            key={index} 
+                            index={index} 
+                            className="w-12 h-16 text-2xl font-bold border-2 rounded-xl focus:ring-indigo-500 bg-background/50"
+                          />
+                        ))}
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+                  
+                  <div className="flex w-full gap-3 pt-4">
+                    <Button variant="ghost" onClick={onClose} className="flex-1 font-semibold font-[Poppins]">
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={verifyCode} 
+                      disabled={sessionCode.length !== 6}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-600/20 font-[Poppins]"
+                    >
+                      Join Quiz
+                    </Button>
+                  </div>
                 </div>
-                
-                <div className="flex space-x-2">
-                  <Button 
-                    onClick={verifyCode} 
-                    disabled={!sessionCode.trim() || sessionCode.length !== 6}
-                    className="flex-1 font-sans"
-                  >
-                    Next
-                  </Button>
-                  <Button variant="outline" onClick={onClose} className="font-sans">
-                    Cancel
-                  </Button>
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="participantName" className="text-sm font-semibold font-[Poppins]">Your Nickname</Label>
+                    <Input
+                      id="participantName"
+                      placeholder="e.g. QuizMaster99"
+                      value={participantName}
+                      onChange={(e) => setParticipantName(e.target.value)}
+                      className="h-12 text-lg font-[Poppins] bg-background/50 border-2 focus:ring-indigo-500"
+                      autoFocus
+                    />
+                  </div>
+                  
+                  <div className="p-4 rounded-xl bg-muted/50 border flex items-center justify-between">
+                    <span className="text-sm font-medium text-muted-foreground font-[Poppins]">Quiz Code</span>
+                    <span className="text-lg font-bold font-mono tracking-widest text-indigo-600">{sessionCode}</span>
+                  </div>
+                  
+                  <div className="flex gap-3 pt-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => setJoinStep('code')}
+                      className="flex-1 font-semibold font-[Poppins]"
+                    >
+                      Back
+                    </Button>
+                    <Button 
+                      onClick={joinQuiz} 
+                      disabled={!participantName.trim() || isJoining}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-600/20 font-[Poppins]"
+                    >
+                      {isJoining ? 'Joining...' : 'Start Playing'}
+                    </Button>
+                  </div>
                 </div>
-              </>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="participantName" className="font-sans">Your Name</Label>
-                  <Input
-                    id="participantName"
-                    placeholder="Enter your name"
-                    value={participantName}
-                    onChange={(e) => setParticipantName(e.target.value)}
-                    className="font-sans"
-                    autoFocus
-                  />
-                </div>
-                
-                <div className="text-sm text-gray-500 font-sans">
-                  Quiz Code: <span className="font-mono tracking-wider">{sessionCode}</span>
-                </div>
-                
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="outline"
-                    onClick={() => setJoinStep('code')}
-                    className="font-sans"
-                  >
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={joinQuiz} 
-                    disabled={!participantName.trim() || isJoining}
-                    className="flex-1 font-sans"
-                  >
-                    {isJoining ? 'Joining...' : 'Join Quiz'}
-                  </Button>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     )
   }

@@ -47,7 +47,7 @@ app.prepare().then(() => {
 
   io.on('connection', (socket) => {
     console.log('🟢 Client connected:', socket.id)
-    
+
     // Debug: Log all incoming events
     socket.onAny((eventName, ...args) => {
       console.log('📨 Socket event received:', eventName, 'from:', socket.id, 'data:', args)
@@ -57,7 +57,7 @@ app.prepare().then(() => {
     socket.on('host-quiz', (data) => {
       const { quizId, hostId, quiz } = data
       const sessionCode = Math.random().toString(36).substring(2, 8).toUpperCase()
-      
+
       const session = {
         id: sessionCode,
         quizId,
@@ -69,10 +69,10 @@ app.prepare().then(() => {
         isActive: false,
         startTime: null
       }
-      
+
       quizSessions.set(sessionCode, session)
       socket.join(`quiz-${sessionCode}`)
-      
+
       socket.emit('quiz-hosted', { sessionCode, session })
       console.log(`Quiz hosted with code: ${sessionCode}`)
     })
@@ -80,15 +80,23 @@ app.prepare().then(() => {
     // Participant joins quiz
     socket.on('join-quiz', (data) => {
       console.log('🔵 join-quiz event received:', data)
-      const { sessionCode, participantName } = data
+      let { sessionCode, participantName } = data
+
+      if (!sessionCode) {
+        socket.emit('join-error', { message: 'Session code is required' })
+        return
+      }
+
+      sessionCode = sessionCode.toUpperCase().trim()
       const session = quizSessions.get(sessionCode)
       console.log('🔍 Session lookup result:', session ? 'Found' : 'Not found', 'for code:', sessionCode)
-      
+      console.log('📋 Current active sessions:', Array.from(quizSessions.keys()))
+
       if (!session) {
         socket.emit('join-error', { message: 'Quiz session not found' })
         return
       }
-      
+
       const participantId = socket.id
       const participant = {
         id: participantId,
@@ -98,14 +106,14 @@ app.prepare().then(() => {
         answers: [],
         joinedAt: Date.now()
       }
-      
+
       session.participants.set(participantId, participant)
       socket.join(`quiz-${sessionCode}`)
-      
+
       // Notify participant
-      const joinResponse = { 
-        sessionCode, 
-        participantId, 
+      const joinResponse = {
+        sessionCode,
+        participantId,
         quizInfo: {
           title: session.quiz.title,
           description: session.quiz.description,
@@ -118,7 +126,7 @@ app.prepare().then(() => {
           score: p.score
         }))
       }
-      
+
       // If quiz is active, send current question immediately
       if (session.isActive && session.currentQuestion >= 0) {
         const currentQuestion = session.quiz.questions[session.currentQuestion]
@@ -137,10 +145,10 @@ app.prepare().then(() => {
             image: currentQuestion.image
           }
         }
-        
+
         joinResponse.isActive = true
         joinResponse.currentQuestion = questionData
-        
+
         socket.emit('joined-quiz', joinResponse)
         // Send quiz-started event to sync with current question
         socket.emit('quiz-started', questionData)
@@ -148,9 +156,9 @@ app.prepare().then(() => {
         joinResponse.isActive = false
         socket.emit('joined-quiz', joinResponse)
       }
-      
+
       // Notify host and other participants
-      socket.to(`quiz-${sessionCode}`).emit('participant-joined', {
+      io.to(`quiz-${sessionCode}`).emit('participant-joined', {
         participant: {
           id: participant.id,
           name: participant.name,
@@ -158,41 +166,41 @@ app.prepare().then(() => {
         },
         totalParticipants: session.participants.size
       })
-      
-      console.log(`${participantName} joined quiz ${sessionCode}${session.isActive ? ' (quiz in progress)' : ''}`)
+
+      console.log(`👤 Participant ${participantName} (${socket.id}) joined quiz ${sessionCode}${session.isActive ? ' (quiz in progress)' : ''}`)
     })
 
     // Host starts the quiz
     socket.on('start-quiz', (data) => {
       const { sessionCode } = data
       const session = quizSessions.get(sessionCode)
-      
+
       if (!session || session.hostSocketId !== socket.id) {
         socket.emit('error', { message: 'Unauthorized or session not found' })
         return
       }
-      
+
       session.isActive = true
       session.currentQuestion = 0
       session.startTime = Date.now()
-      
+
       const question = session.quiz.questions[0]
       const questionData = {
-          questionNumber: 1,
-          totalQuestions: session.quiz.questions.length,
-          question: {
-            id: question.id,
-            text: question.question,
-            question: question.question,
-            type: question.type,
-            options: question.options,
-            timeLimit: question.settings?.timeLimit || 30,
-            correctAnswers: question.correctAnswers,
-            settings: question.settings,
-            image: question.image
-          }
+        questionNumber: 1,
+        totalQuestions: session.quiz.questions.length,
+        question: {
+          id: question.id,
+          text: question.question,
+          question: question.question,
+          type: question.type,
+          options: question.options,
+          timeLimit: question.settings?.timeLimit || 30,
+          correctAnswers: question.correctAnswers,
+          settings: question.settings,
+          image: question.image
         }
-      
+      }
+
       io.to(`quiz-${sessionCode}`).emit('quiz-started', questionData)
       console.log(`Quiz ${sessionCode} started`)
     })
@@ -201,30 +209,30 @@ app.prepare().then(() => {
     socket.on('submit-answer', (data) => {
       const { sessionCode, questionId, answer, timeSpent } = data
       const session = quizSessions.get(sessionCode)
-      
+
       if (!session || !session.isActive) {
         socket.emit('error', { message: 'Quiz session not active' })
         return
       }
-      
+
       const participant = session.participants.get(socket.id)
       if (!participant) {
         socket.emit('error', { message: 'Participant not found' })
         return
       }
-      
+
       const currentQuestion = session.quiz.questions[session.currentQuestion]
       if (currentQuestion.id !== questionId) {
         socket.emit('error', { message: 'Invalid question' })
         return
       }
-      
+
       // Calculate score
       let isCorrect = false
       let points = 0
-      
+
       const correctAnswers = currentQuestion.correctAnswers || []
-      
+
       console.log('Scoring debug:', {
         participantId: socket.id,
         participantName: participant.name,
@@ -234,7 +242,7 @@ app.prepare().then(() => {
         questionSettings: currentQuestion.settings,
         previousScore: participant.score
       })
-      
+
       if (currentQuestion.type === 'single-choice' || currentQuestion.type === 'true-false') {
         // For single choice, answer should be a number and should be in correctAnswers array
         isCorrect = correctAnswers.includes(answer)
@@ -246,23 +254,23 @@ app.prepare().then(() => {
         const noIncorrectSelected = answerArray.every(idx => correctAnswers.includes(idx))
         isCorrect = allCorrectSelected && noIncorrectSelected && answerArray.length > 0
       }
-      
+
       console.log('Is answer correct?', isCorrect)
-      
+
       if (isCorrect) {
         // Award points based on question settings and time bonus
         const basePoints = currentQuestion.settings?.points || 500
         const timeLimit = currentQuestion.settings?.timeLimit || 30
-        
+
         // Calculate time bonus (scaled to keep total in 500-900 range)
         let timeBonus = 0
         if (timeLimit && timeSpent < timeLimit) {
           // Time bonus can add up to 400 points (making max 900)
           timeBonus = Math.floor((1 - timeSpent / timeLimit) * 400)
         }
-        
+
         points = basePoints + timeBonus
-        
+
         console.log('Points calculation:', {
           basePoints,
           timeLimit,
@@ -272,7 +280,7 @@ app.prepare().then(() => {
           participantName: participant.name
         })
       }
-      
+
       participant.answers.push({
         questionId,
         answer,
@@ -281,7 +289,7 @@ app.prepare().then(() => {
         timeSpent
       })
       participant.score += points
-      
+
       console.log('Score update:', {
         participantName: participant.name,
         participantId: socket.id,
@@ -289,9 +297,9 @@ app.prepare().then(() => {
         newTotalScore: participant.score,
         sessionCode
       })
-      
+
       socket.emit('answer-submitted', { isCorrect, points, totalScore: participant.score })
-      
+
       // Notify host of answer submission
       io.to(session.hostSocketId).emit('participant-answered', {
         participantId: participant.id,
@@ -306,14 +314,14 @@ app.prepare().then(() => {
     socket.on('next-question', (data) => {
       const { sessionCode } = data
       const session = quizSessions.get(sessionCode)
-      
+
       if (!session || session.hostSocketId !== socket.id) {
         socket.emit('error', { message: 'Unauthorized or session not found' })
         return
       }
-      
+
       session.currentQuestion++
-      
+
       if (session.currentQuestion >= session.quiz.questions.length) {
         // Quiz finished
         const leaderboard = Array.from(session.participants.values())
@@ -323,7 +331,7 @@ app.prepare().then(() => {
             name: p.name,
             score: p.score
           }))
-        
+
         io.to(`quiz-${sessionCode}`).emit('quiz-finished', { leaderboard })
         console.log(`Quiz ${sessionCode} finished`)
       } else {
@@ -344,7 +352,7 @@ app.prepare().then(() => {
             image: question.image
           }
         }
-        
+
         io.to(`quiz-${sessionCode}`).emit('next-question', questionData)
       }
     })
@@ -353,30 +361,30 @@ app.prepare().then(() => {
     socket.on('show-question-results', (data) => {
       const { sessionCode } = data
       const session = quizSessions.get(sessionCode)
-      
+
       if (!session || session.hostSocketId !== socket.id) {
         socket.emit('error', { message: 'Unauthorized or session not found' })
         return
       }
-      
+
       const currentQuestion = session.quiz.questions[session.currentQuestion]
-      
+
       // Check if this question should show leaderboard after
       if (currentQuestion?.settings?.showLeaderboardAfter) {
         // Generate leaderboard with rankings
         const sortedParticipants = Array.from(session.participants.values())
           .sort((a, b) => b.score - a.score)
-        
+
         // Send personalized mini-leaderboard to each participant
         sortedParticipants.forEach((participant, index) => {
           const rank = index + 1
           const participantAbove = index > 0 ? sortedParticipants[index - 1] : null
           const participantBelow = index < sortedParticipants.length - 1 ? sortedParticipants[index + 1] : null
-          
+
           // Get the participant's answer for this question
           const participantAnswer = participant.answers.find(a => a.questionId === currentQuestion.id)
           const isCorrect = participantAnswer?.isCorrect || false
-          
+
           const miniLeaderboard = {
             currentParticipant: {
               name: participant.name,
@@ -395,10 +403,10 @@ app.prepare().then(() => {
               rank: index + 2
             } : null
           }
-          
+
           io.to(participant.socketId).emit('question-results', { miniLeaderboard })
         })
-        
+
         // Also send full leaderboard to host
         const fullLeaderboard = sortedParticipants.map((p, index) => ({
           id: p.id,
@@ -406,7 +414,7 @@ app.prepare().then(() => {
           score: p.score,
           rank: index + 1
         }))
-        
+
         io.to(session.hostSocketId).emit('question-results', { leaderboard: fullLeaderboard })
       }
     })
@@ -415,25 +423,25 @@ app.prepare().then(() => {
     socket.on('start-poll', (data) => {
       const { sessionCode, poll } = data
       const session = quizSessions.get(sessionCode)
-      
+
       if (!session || session.hostSocketId !== socket.id) {
         socket.emit('error', { message: 'Unauthorized or session not found' })
         return
       }
-      
+
       // Store poll in session
       session.activePoll = {
         question: poll.question,
         options: poll.options,
         responses: new Map() // participantId -> selectedOption
       }
-      
+
       // Send poll to all participants
       io.to(`quiz-${sessionCode}`).emit('poll-started', {
         question: poll.question,
         options: poll.options
       })
-      
+
       console.log(`Poll started in session ${sessionCode}: ${poll.question}`)
     })
 
@@ -441,28 +449,28 @@ app.prepare().then(() => {
     socket.on('poll-response', (data) => {
       const { sessionCode, option } = data
       const session = quizSessions.get(sessionCode)
-      
+
       if (!session || !session.activePoll) {
         socket.emit('error', { message: 'No active poll found' })
         return
       }
-      
+
       const participant = session.participants.get(socket.id)
       if (!participant) {
         socket.emit('error', { message: 'Participant not found' })
         return
       }
-      
+
       // Store participant's response
       session.activePoll.responses.set(socket.id, option)
-      
+
       // Notify host of the response
       io.to(session.hostSocketId).emit('poll-response', {
         participantId: socket.id,
         participantName: participant.name,
         option: option
       })
-      
+
       console.log(`Poll response from ${participant.name}: ${option}`)
     })
 
@@ -470,34 +478,34 @@ app.prepare().then(() => {
     socket.on('end-poll', (data) => {
       const { sessionCode } = data
       const session = quizSessions.get(sessionCode)
-      
+
       if (!session || session.hostSocketId !== socket.id) {
         socket.emit('error', { message: 'Unauthorized or session not found' })
         return
       }
-      
+
       if (session.activePoll) {
         // Calculate final results
         const results = {}
         session.activePoll.options.forEach(option => {
           results[option] = 0
         })
-        
+
         session.activePoll.responses.forEach(selectedOption => {
           if (results.hasOwnProperty(selectedOption)) {
             results[selectedOption]++
           }
         })
-        
+
         // Send final results to all participants
         io.to(`quiz-${sessionCode}`).emit('poll-ended', {
           question: session.activePoll.question,
           results: results
         })
-        
+
         // Clear active poll
         session.activePoll = null
-        
+
         console.log(`Poll ended in session ${sessionCode}`)
       }
     })
@@ -505,7 +513,7 @@ app.prepare().then(() => {
     // Handle disconnection
     socket.on('disconnect', () => {
       console.log('Client disconnected:', socket.id)
-      
+
       // Check if disconnected client was a host
       for (const [sessionCode, session] of quizSessions.entries()) {
         if (session.hostSocketId === socket.id) {
@@ -517,7 +525,7 @@ app.prepare().then(() => {
           // Remove participant
           const participant = session.participants.get(socket.id)
           session.participants.delete(socket.id)
-          
+
           io.to(`quiz-${sessionCode}`).emit('participant-left', {
             participantId: socket.id,
             participantName: participant.name,

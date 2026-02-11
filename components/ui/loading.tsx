@@ -1,6 +1,7 @@
 "use client"
 
-import { Loader2 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Loader2, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 import { LoadingSpinner, Skeleton } from "./enhanced-loading"
@@ -86,75 +87,116 @@ export function Loading({
 
 // Page-level loading component with enhanced performance
 export function PageLoading({ text = "Loading page..." }: { text?: string }) {
+  const [tipsIndex, setTipsIndex] = useState(0)
+  const tips = [
+    "Did you know? You can earn badges for daily logins!",
+    "Challenge your friends to a real-time quiz battle.",
+    "The faster you answer, the more points you earn!",
+    "Customize your profile to stand out in the leaderboard.",
+    "Create your own quizzes and share them with the world."
+  ]
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTipsIndex((prev) => (prev + 1) % tips.length)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [tips.length])
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-black flex items-center justify-center">
+    <div className="min-h-screen bg-background flex items-center justify-center overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/5 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 rounded-full blur-[100px]" />
+      </div>
+
       <motion.div 
-        className="text-center space-y-6 max-w-md mx-auto px-6"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="relative z-10 text-center space-y-8 max-w-md mx-auto px-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
       >
-        {/* Enhanced spinner with gradient */}
-        <motion.div
-          className="relative mx-auto w-16 h-16"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-20 animate-pulse" />
-          <LoadingSpinner size="lg" className="relative z-10 border-indigo-500 border-t-purple-500" />
-        </motion.div>
-        
-        {/* Brand logo/text */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, ease: "easeOut" }}
-        >
-          <h1 className="text-2xl font-bold font-zen-dots bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
-            QuizCraft
-          </h1>
-          <p className="text-sm font-zen-dots text-gray-600 dark:text-gray-300 mb-2">
-            Test your IQ with us
-          </p>
-          <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300">
-            {text}
-          </h2>
-        </motion.div>
-        
-        {/* Animated progress dots */}
-        <motion.div
-          className="flex justify-center space-x-1"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          {[0, 1, 2].map((index) => (
-            <motion.div
-              key={index}
-              className="w-2 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 1, 0.5]
-              }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                delay: index * 0.2,
-                ease: "easeInOut"
-              }}
+        {/* Main Loading Visual */}
+        <div className="relative mx-auto w-32 h-32">
+          {/* Rotating outer rings */}
+          <motion.div 
+            className="absolute inset-0 border-4 border-indigo-500/20 rounded-full"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.div 
+            className="absolute inset-2 border-4 border-t-purple-500 border-r-transparent border-b-transparent border-l-transparent rounded-full"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          />
+          
+          {/* Central Logo Animation */}
+          <motion.div 
+            className="absolute inset-0 flex items-center justify-center"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-4 rounded-2xl shadow-xl shadow-indigo-500/20">
+              <BookOpen className="w-10 h-10 text-white" />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Text Section */}
+        <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h1 className="text-3xl font-bold font-zen-dots tracking-tighter mb-1">
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+                QuizCraft
+              </span>
+            </h1>
+            <div className="h-1 w-12 bg-gradient-to-r from-indigo-600 to-purple-600 mx-auto rounded-full mb-4" />
+          </motion.div>
+
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold text-foreground/80 tracking-tight">
+              {text}
+            </h2>
+            
+            {/* Dynamic Tips */}
+            <div className="h-12 flex items-center justify-center">
+              <motion.p 
+                key={tipsIndex}
+                className="text-sm text-muted-foreground italic"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.4 }}
+              >
+                "{tips[tipsIndex]}"
+              </motion.p>
+            </div>
+          </div>
+        </div>
+
+        {/* Loading Progress Bar */}
+        <div className="w-48 mx-auto space-y-3">
+          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <motion.div 
+              className="h-full bg-gradient-to-r from-indigo-600 to-purple-600"
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
-          ))}
-        </motion.div>
-        
-        <motion.p 
-          className="text-sm text-gray-500 dark:text-gray-400"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          Crafting your quiz experience...
-        </motion.p>
+          </div>
+          <motion.p 
+            className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold"
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            Connecting to server
+          </motion.p>
+        </div>
       </motion.div>
     </div>
   )

@@ -56,7 +56,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
 
   // Predefined tags for dropdown
   const predefinedTags = [
-    "Science", "Math", "History", "Geography", "Literature", "Technology", 
+    "Science", "Math", "History", "Geography", "Literature", "Technology",
     "Sports", "Entertainment", "Business", "Health", "Art", "Music",
     "Programming", "Education", "General Knowledge", "Fun", "Trivia"
   ]
@@ -583,7 +583,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                   rows={3}
                 />
               </div>
-              
+
               {/* Tags Section */}
               <div className="space-y-2">
                 <Label>Tags</Label>
@@ -610,7 +610,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                       Add
                     </Button>
                   </div>
-                  
+
                   {/* Predefined tags dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -630,7 +630,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  
+
                   {/* Selected tags display */}
                   {tags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
@@ -702,7 +702,12 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
           <div className="space-y-3 sm:space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
               <h3 className="text-base sm:text-lg font-semibold text-white">Questions</h3>
-              <Button type="button" onClick={addQuestion} variant="outline" className="w-full sm:w-auto bg-transparent text-white border-white hover:bg-white hover:text-black">
+              <Button
+                type="button"
+                onClick={addQuestion}
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
                 <Plus className="h-4 w-4 sm:mr-2" />
                 <span className="ml-2 sm:ml-0">Add Question</span>
               </Button>
@@ -933,7 +938,7 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
                   type="button"
                   variant="outline"
                   disabled={!title || questions.some((q) => !q.question)}
-                  className="w-full sm:w-auto bg-transparent text-white border-white hover:bg-white hover:text-black disabled:opacity-50"
+                  className="w-full sm:w-auto"
                 >
                   <Eye className="h-4 w-4 sm:mr-2" />
                   <span className="ml-2 sm:ml-0">Preview</span>
@@ -1033,11 +1038,11 @@ export function QuizCreateForm({ user }: QuizCreateFormProps) {
               </DialogContent>
             </Dialog>
             <Link href="/dashboard">
-              <Button type="button" variant="outline" className="w-full sm:w-auto bg-transparent text-white border-white hover:bg-white hover:text-black">
+              <Button type="button" variant="outline" className="w-full sm:w-auto">
                 Cancel
               </Button>
             </Link>
-            <Button type="button" variant="outline" onClick={exportQuiz} className="w-full sm:w-auto bg-transparent text-white border-white hover:bg-white hover:text-black">
+            <Button type="button" variant="outline" onClick={exportQuiz} className="w-full sm:w-auto">
               Export Quiz JSON
             </Button>
             <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">

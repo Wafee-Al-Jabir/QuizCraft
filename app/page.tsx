@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SimpleThemeToggle } from "@/components/ui/theme-toggle"
+import { DonateButton } from "@/components/ui/donate-button"
 import { BookOpen, Users, Trophy, Zap, LogOut } from "lucide-react"
 import { getCurrentUser } from "@/lib/auth"
 import { signOut } from "@/lib/auth-actions"
@@ -45,9 +46,25 @@ export default function HomePage() {
   }, [])
 
   const handleSignOut = async () => {
-    await signOut()
-    setUser(null)
-    window.location.reload()
+    try {
+      // 1. Sign out from NextAuth if session exists
+      const { signOut: nextAuthSignOut } = await import("next-auth/react")
+      await nextAuthSignOut({ redirect: false })
+
+      // 2. Sign out from custom session
+      await signOut()
+
+      // 3. Clear local storage
+      if (typeof window !== 'undefined') {
+        localStorage.clear()
+        // 4. Redirect to landing page
+        window.location.href = "/"
+      }
+    } catch (error) {
+      console.error("Sign out failed:", error)
+      // Fallback redirect
+      window.location.href = "/"
+    }
   }
 
   const handleHostQuiz = () => {
@@ -88,6 +105,7 @@ export default function HomePage() {
           </Link>
 
           <div className="flex items-center space-x-2 sm:space-x-4">
+            <DonateButton />
             <SimpleThemeToggle />
             {!mounted || isLoading ? (
               <div className="animate-pulse">

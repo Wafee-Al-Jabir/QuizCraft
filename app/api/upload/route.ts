@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile } from 'fs/promises'
 import { join } from 'path'
-import { getCurrentUserServer } from '@/lib/auth-server'
+import { getCurrentUser } from '@/lib/auth-utils'
 
 export async function POST(request: NextRequest) {
   try {
     // Check if user is authenticated
-    const user = await getCurrentUserServer()
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 // Handle DELETE requests to remove uploaded images
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await getCurrentUserServer()
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

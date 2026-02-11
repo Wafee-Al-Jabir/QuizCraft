@@ -377,7 +377,7 @@ export function InteractiveLeaderboard({
                       'px-3 py-2 text-sm font-medium transition-colors',
                       selectedPeriod === key
                         ? 'bg-blue-500 text-white'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-accent hover:text-accent-foreground'
                     )}
                   >
                     {label}
@@ -402,7 +402,7 @@ export function InteractiveLeaderboard({
                         'px-3 py-2 text-sm font-medium transition-colors flex items-center space-x-1',
                         selectedCategory === key
                           ? 'bg-blue-500 text-white'
-                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-accent hover:text-accent-foreground'
                       )}
                     >
                       <Icon className="w-3 h-3" />

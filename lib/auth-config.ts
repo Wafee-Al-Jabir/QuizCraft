@@ -49,6 +49,7 @@ export const authOptions: NextAuthOptions = {
         if (user.lastName) session.user.lastName = user.lastName
         if (user.provider) session.user.provider = user.provider
         if (user.image) session.user.image = user.image
+        if (user.streakData) session.user.streakData = user.streakData
       }
       return session
     },

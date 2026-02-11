@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation"
-import { getCurrentUserServer } from "@/lib/auth-server"
+import { getCurrentUser } from "@/lib/auth-utils"
 import { QuizCreateForm } from "@/components/quiz/quiz-create-form"
 
 export default async function CreateQuizPage() {
-  const user = await getCurrentUserServer()
+  const user = await getCurrentUser()
 
   if (!user) {
     redirect("/auth/signin")

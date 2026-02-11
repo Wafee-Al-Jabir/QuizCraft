@@ -8,6 +8,7 @@ import { AnimatedCard, StaggeredContainer } from "@/components/ui/micro-interact
 import { motion } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { SimpleThemeToggle } from "@/components/ui/theme-toggle"
+import { DonateButton } from "@/components/ui/donate-button"
 import { BookOpen, Plus, FileText, Users, BarChart3, LogOut, Settings, TrendingUp, Trash2, HelpCircle, UserPlus, Trophy, Upload, Download, Copy, ChevronDown } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -71,8 +72,25 @@ export function DashboardContent({ user }: DashboardContentProps) {
   }, [user.id])
 
   const handleSignOut = async () => {
-    await signOut()
-    window.location.href = "/"
+    try {
+      // 1. Sign out from NextAuth if session exists
+      const { signOut: nextAuthSignOut } = await import("next-auth/react")
+      await nextAuthSignOut({ redirect: false })
+
+      // 2. Sign out from custom session
+      await signOut()
+
+      // 3. Clear local storage
+      if (typeof window !== 'undefined') {
+        localStorage.clear()
+        // 4. Redirect to home page
+        window.location.href = "/"
+      }
+    } catch (error) {
+      console.error("Sign out failed:", error)
+      // Fallback redirect
+      window.location.href = "/"
+    }
   }
 
   const handleTogglePublish = async (quizId: string, currentStatus: boolean) => {
@@ -256,6 +274,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
                 </Tooltip>
               </TooltipProvider>
             </Link>
+            <DonateButton />
             <SimpleThemeToggle />
             <span className="hidden sm:block text-sm text-gray-600 dark:text-gray-300 font-medium">
               Welcome, {user.firstName} {user.lastName}

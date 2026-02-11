@@ -1,21 +1,20 @@
 import { notFound, redirect } from "next/navigation"
-import { getCurrentUserServer } from "@/lib/auth-server"
+import { getCurrentUser } from "@/lib/auth-utils"
 import { getQuiz } from "@/lib/quiz-actions"
 import { QuizEditForm } from "@/components/quiz/quiz-edit-form"
 
 interface QuizEditPageProps {
-  params: {
-    id: string
-  }
+  params: Promise<{ id: string }>
 }
 
 export default async function QuizEditPage({ params }: QuizEditPageProps) {
-  const user = await getCurrentUserServer()
+  const { id } = await params
+  const user = await getCurrentUser()
   if (!user) {
     redirect("/auth/signin")
   }
 
-  const quiz = await getQuiz(params.id)
+  const quiz = await getQuiz(id)
   if (!quiz) {
     notFound()
   }

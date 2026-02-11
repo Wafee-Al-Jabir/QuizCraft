@@ -6,7 +6,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Button } from "@/components/ui/button"
 import { Trophy, Star, Zap, Users, Target, Rocket, Globe, Award, ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { getCurrentUserServer } from "@/lib/auth-server"
+import { getCurrentUser } from "@/lib/auth-utils"
+import { BadgesContent } from "@/components/badges/badges-content"
 import { getQuizStats } from "@/lib/quiz-actions"
 import type { Badge, UserBadge, User } from "@/lib/types"
 
@@ -295,7 +296,7 @@ function calculateProgress(badge: Badge, stats: any) {
 }
 
 export default async function BadgesPage() {
-  const user = await getCurrentUserServer()
+  const user = await getCurrentUser()
   
   if (!user) {
     redirect("/auth/signin")

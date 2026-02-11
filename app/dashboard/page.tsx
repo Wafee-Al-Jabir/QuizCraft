@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation"
-import { getCurrentUserServer } from "@/lib/auth-server"
+import { getCurrentUser } from "@/lib/auth-utils"
 import { DashboardContent } from "@/components/dashboard/dashboard-content"
 
 export default async function DashboardPage() {
-  const user = await getCurrentUserServer()
+  const user = await getCurrentUser()
 
   if (!user) {
     redirect("/auth/signin")
